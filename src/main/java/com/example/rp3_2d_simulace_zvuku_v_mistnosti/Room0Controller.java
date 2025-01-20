@@ -1,0 +1,318 @@
+package com.example.rp3_2d_simulace_zvuku_v_mistnosti;
+
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.fxml.FXML;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.Region;
+import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
+import javafx.stage.Screen;
+import javafx.stage.Stage;
+import javafx.util.Duration;
+
+import java.io.IOException;
+
+public class Room0Controller {
+
+    //inicializace promennych
+    Room0 mistnost0Class = new Room0();
+    private int mistnost0SceneHeight = mistnost0Class.getMistnost0ScreenHeight();
+    private int mistnost0SceneWidth = mistnost0Class.getMistnost0ScreenWidth();
+    private double rectangleHeight = (double)mistnost0SceneHeight/4;
+    private double rectangleSize = (double) mistnost0SceneWidth/4;
+    private static boolean vlnaExistuje = false;
+    private boolean isRunning = true;
+    private double currentRadius = 0;      // To track the current radius for resuming
+    private double x;
+    private double y;
+    private  final double maxRadius = Math.sqrt(rectangleHeight*rectangleHeight + rectangleSize * rectangleSize);
+    private final int roomID = 0;
+
+//--------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    //getters
+    public int getMistnost0SceneHeight(){
+        return mistnost0SceneHeight;
+    }
+    public int getMistnost0SceneWidth(){
+        return mistnost0SceneWidth;
+    }
+    public Pane getCenterPane(){
+        return centerPane;
+    }
+    public boolean getVlnaExistuje() {
+        return vlnaExistuje;
+    }
+    public boolean getIsRunning(){
+        return isRunning;
+    }
+    public double getCurrentRadius(){
+        return currentRadius;
+    }
+    public double getX() {
+        return x;
+    }
+    public double getY() {
+        return y;
+    }
+    public int getRoomID() {
+        return roomID;
+    }
+    public  double getMaxRadius() {
+        return maxRadius;
+    }
+
+//--------------------------------------------------------------------------------------------------------------------------------------------------------
+    //inicializace promennych
+
+    @FXML
+    BorderPane root;
+    @FXML
+    private Button buttonHlavniMenu;
+    @FXML
+    private Button buttonStop;
+    @FXML
+    private Label labelInstrukce;
+    @FXML
+    private Button buttonResume;
+    @FXML
+    private Button buttonReset;
+    @FXML
+    private Pane centerPane;
+    @FXML
+    private HBox mistnost0HBox;
+    @FXML
+    private HBox buttonHlavniMenuHBox;
+    @FXML
+    private Label bottomText;
+    @FXML
+    private Rectangle rectangle;
+
+    private Stage stage;
+//--------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    // vytvoreni promennych na cas
+    private Timeline timer;
+    private int millisecondsElapsed  = 0;  // Track elapsed seconds
+//--------------------------------------------------------------------------------------------------------------------------------------------------------
+    // inicializace waveManazera a waveFactory
+    private WaveFactory waveFactory = new WaveFactory();
+    private WaveManager waveManager = new WaveManager(waveFactory, centerPane);
+    private Timeline waveTimeline;
+
+    public void setSceneDimensions(Scene scene, int height, int width) {
+
+        stage.setScene(scene);
+        stage.setHeight(height);
+        stage.setWidth(width);
+        /*stage.setFullScreen(true);
+        stage.setResizable(false);*/
+        updateLayout();
+    }
+
+    public void setStage(Stage stage) {
+        System.out.println("set stage");
+        this.stage = stage;
+
+        // Check if fullscreen is enabled
+        boolean isFullScreen = stage.isFullScreen();
+
+        if (!isFullScreen) {
+            // If not fullscreen, set the stage dimensions to match the screen size
+            double width = Screen.getPrimary().getBounds().getWidth();
+            double height = Screen.getPrimary().getBounds().getHeight();
+            stage.setWidth(width);
+            stage.setHeight(height);
+            stage.setMaximized(true);
+            stage.setResizable(false);
+            initializeRectangle(stage.getWidth()/2, stage.getHeight()/2);
+
+            // Debugging output
+            System.out.println("Stage size set to: " + width + " x " + height);
+        } else {
+            // If fullscreen, let JavaFX handle the size
+            System.out.println("Fullscreen mode is enabled. Dimensions managed by JavaFX.");
+        }
+    }
+
+    /** inicializace timeru, tlacitek a obdelnika */
+    @FXML
+    public void initialize() {
+        System.out.println("-----------inicializace zacala-------------");
+        updateLayout();
+        waveFactory = new WaveFactory();
+        if (centerPane == null) {
+            System.err.println("Error: centerPane is null. Check your FXML file.");
+        }
+        waveManager = new WaveManager(waveFactory, centerPane);
+
+        createTimeline();
+        buttonResume.setDisable(true);
+        buttonStop.setDisable(true);
+        buttonReset.setDisable(true);
+        centerPane.setPrefHeight(mistnost0SceneHeight);
+        centerPane.setPrefWidth(mistnost0SceneWidth);
+
+        
+        System.out.println("-----------inicializace skoncila-------------");
+    }
+
+    public void initializeRectangle(double x, double y) {
+        if (rectangle != null) {
+            rectangle.setWidth(rectangleSize);
+            rectangle.setHeight(rectangleSize);
+            rectangle.setX(x- rectangleSize / 2);
+            rectangle.setY(y- rectangleSize);
+        } else {
+            System.err.println("Error: Stage or Rectangle is null. Check initialization.");
+        }
+    }
+
+
+//--------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    //zapnuti timeru
+    private void createTimeline() {
+        timer = new Timeline(new KeyFrame(Duration.millis(1), event -> {
+            millisecondsElapsed++;
+            updateTimerLabel();
+        }));
+        timer.setCycleCount(Timeline.INDEFINITE);  // Run indefinitely
+    }
+
+//--------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    //nastaveni velikosti jednotlivych tlacitek
+    public void updateLayout() {
+        System.out.println("update layout");
+        if (root != null){
+            //Velikost buttonHlavniMenu
+
+            buttonHlavniMenu.setPrefWidth(mistnost0SceneWidth /8);
+            buttonHlavniMenu.setPrefHeight(mistnost0SceneHeight/8);
+
+            //velikost buttonStop a start
+            labelInstrukce.setPrefSize(mistnost0SceneWidth /8, mistnost0SceneHeight/8);
+            buttonStop.setPrefSize(mistnost0SceneWidth /8, mistnost0SceneHeight/8);
+            buttonResume.setPrefSize(mistnost0SceneWidth /8, mistnost0SceneHeight/8);
+            buttonReset.setPrefSize(mistnost0SceneWidth /8, mistnost0SceneHeight/8);
+
+            //velikost bottom textu
+            bottomText.setPrefSize(mistnost0SceneWidth /8, mistnost0SceneHeight/8);
+            bottomText.setFont(new Font(20));
+
+        }
+
+    }
+
+
+    //zmeni se scena na hlavni menu
+    @FXML
+    public void handleButtonHlavniMenuClick() throws IOException {
+        System.out.println("switch hlavni menu");
+        MainMenu hlavniMenu = new MainMenu();
+        hlavniMenu.setScene(stage);
+    }
+
+    //Stop tlacitko
+    @FXML
+    public void handleButtonStopClick() throws IOException {
+        timer.stop();  // Stop the timer
+        buttonStop.setDisable(false);  // Re-enable the start button
+        buttonStop.setDisable(true);  // Disable the stop button
+        buttonResume.setDisable(false);  //Enable resume button
+        buttonReset.setDisable(false);
+        waveTimeline.stop();
+    }
+
+    //Resume tlacitko
+    @FXML
+    public void handleButtonResumeClick() {
+        timer.play();
+        buttonStop.setDisable(false);
+        buttonReset.setDisable(false);
+        buttonResume.setDisable(true);
+        waveTimeline.play();
+    }
+
+    //Restart tlacitko
+    @FXML
+    public void handleButtonResetClick() {
+        timer.stop();  // Stop the timer, if running
+        millisecondsElapsed = 0;  // Reset time to 0
+        updateTimerLabel();  // Update the timer label to show 0
+        buttonStop.setDisable(true);  // Disable the stop button
+        buttonResume.setDisable(true);  // Disable the resume button, as there's nothing to resume
+        buttonReset.setDisable(true);
+        centerPane.getChildren().removeIf(node -> node != rectangle);
+    }
+
+    private void updateTimerLabel() {
+        // Calculate hours, minutes, seconds, and milliseconds from elapsed time
+        int hours = millisecondsElapsed / (3600 * 1000);
+        int minutes = (millisecondsElapsed % (3600 * 1000)) / (60 * 1000);
+        int seconds = (millisecondsElapsed % (60 * 1000)) / 1000;
+        int milliseconds = millisecondsElapsed % 1000;
+
+        // Update the label text with milliseconds precision
+        bottomText.setText(String.format("%02d:%02d:%02d.%03d", hours, minutes, seconds, milliseconds));
+    }
+
+
+    // reseni kliknuti na obdelnik
+    @FXML
+    public  void handlePaneClick(MouseEvent event) {
+        // Get the click coordinates
+        double x = event.getX();
+        double y = event.getY();
+
+        // Check if the click was inside the rectangle using the built-in contains() method
+        if (rectangle.contains(x, y)) {
+            // Save the coordinates if the click was on the rectangle
+            waveManager.createWave(x,y,200);
+            timer.play();
+            buttonStop.setDisable(false);
+            buttonResume.setDisable(true);
+            buttonReset.setDisable(false);
+        } else {
+            System.out.println("Click was not on the rectangle.");
+        }
+
+        if (waveTimeline == null) {
+            // Set up a Timeline for periodic updates
+            waveTimeline = new Timeline(new KeyFrame(Duration.millis(16), new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(ActionEvent event) {
+                    waveManager.updateWaves();
+                }
+            }));
+
+            waveTimeline.setCycleCount(Timeline.INDEFINITE); // Run forever
+            waveTimeline.play(); // Start the timeline
+        }
+    }
+    //reseni drzeni obdelnika
+    @FXML
+    public void handleMouseHold(MouseEvent event) {
+        // Check if the mouse press event occurs inside the rectangle
+        if (rectangle.contains(event.getX(), event.getY())) {
+            System.out.println("Mouse is being held on the rectangle.");
+
+            // Example action: create a wave on hold
+            waveManager.createWave(event.getX(), event.getY(), 300);
+        } else {
+            System.out.println("Mouse is not on the rectangle during hold.");
+        }
+
+        // Optionally, you can initiate other behaviors while holding the mouse here.
+    }
+}

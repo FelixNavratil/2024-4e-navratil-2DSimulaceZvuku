@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
+
+<?import javafx.scene.control.Button?>
+<VBox fx:id="hlavniMenuVBox"
+      alignment="CENTER"
+      spacing="20.0"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.example.rp3_2d_simulace_zvuku_v_mistnosti.MainMenuController">
+
+
+    <Button fx:id="buttonSpustit"
+            text="SPUSTIT"
+            onAction="#handleButtonClick"/>
+
+</VBox>
