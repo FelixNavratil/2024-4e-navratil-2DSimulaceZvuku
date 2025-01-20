@@ -14,7 +14,6 @@ public class Room0 {
 
     // Sets up the scene for the Mistnost0 (a specific room or environment)
     public void setScene(Stage stage) throws IOException {
-
         // Load the FXML file
         FXMLLoader fxmlLoader = new FXMLLoader(MainMenu.class.getResource("mistnost0.fxml"));
         System.out.println("nastavovani full streed Room0");
@@ -29,6 +28,7 @@ public class Room0 {
         stage.setScene(mistnost0Scene);
         stage.show();
     }
+
 
 
     // Getter for Scene Height

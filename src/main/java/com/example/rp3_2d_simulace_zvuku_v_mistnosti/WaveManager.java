@@ -34,15 +34,14 @@ public class WaveManager {
      * Handles creation of a new wave at the given position.
      * @param x The starting X position of the wave.
      * @param y The starting Y position of the wave.
-     * @param maxRadius The maximum radius of the wave.
      */
-    public void createWave(double x, double y, double maxRadius) {
+    public void createWave(double x, double y, Room0Controller controller) {
         if (centerPane == null) {
             System.err.println("Error: centerpane is null. Cannot add wave.");
             return;
         }
         // Create a new wave using the WaveFactory
-        SoundWave wave = waveFactory.createWave(x, y, maxRadius);
+        SoundWave wave = waveFactory.createWave(x, y, controller);
         // Add the newly created wave to the active waves list
         activeWaves.add(wave);
         centerPane.getChildren().add(wave);
@@ -56,9 +55,8 @@ public class WaveManager {
         activeWaves.removeIf(wave -> {
             // Update wave radius
             wave.grow();
-
             // Remove the wave if it has reached its max radius or if it's older than 5 seconds
-            if (wave.isOlderThan(10000)) {
+            if (wave.isOlderThan(7000)) {
                 centerPane.getChildren().remove(wave); // Remove from the UI
                 return true; // Remove the wave from the list
             }

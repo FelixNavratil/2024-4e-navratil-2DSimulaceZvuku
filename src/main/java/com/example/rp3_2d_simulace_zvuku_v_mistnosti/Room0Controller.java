@@ -12,7 +12,6 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.Region;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.stage.Screen;
@@ -20,6 +19,7 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.io.IOException;
+import java.util.List;
 
 public class Room0Controller {
 
@@ -36,6 +36,11 @@ public class Room0Controller {
     private double y;
     private  final double maxRadius = Math.sqrt(rectangleHeight*rectangleHeight + rectangleSize * rectangleSize);
     private final int roomID = 0;
+    private double xMin;
+    private double xMax;
+    private double yMin;
+    private double yMax;
+    private List<Line> roomWalls;
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -66,9 +71,6 @@ public class Room0Controller {
     }
     public int getRoomID() {
         return roomID;
-    }
-    public  double getMaxRadius() {
-        return maxRadius;
     }
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -114,8 +116,6 @@ public class Room0Controller {
         stage.setScene(scene);
         stage.setHeight(height);
         stage.setWidth(width);
-        /*stage.setFullScreen(true);
-        stage.setResizable(false);*/
         updateLayout();
     }
 
@@ -133,7 +133,7 @@ public class Room0Controller {
             stage.setWidth(width);
             stage.setHeight(height);
             stage.setMaximized(true);
-            stage.setResizable(false);
+            stage.setResizable(true);
             initializeRectangle(stage.getWidth()/2, stage.getHeight()/2);
 
             // Debugging output
@@ -143,6 +143,8 @@ public class Room0Controller {
             System.out.println("Fullscreen mode is enabled. Dimensions managed by JavaFX.");
         }
     }
+    
+    
 
     /** inicializace timeru, tlacitek a obdelnika */
     @FXML
@@ -172,11 +174,48 @@ public class Room0Controller {
             rectangle.setHeight(rectangleSize);
             rectangle.setX(x- rectangleSize / 2);
             rectangle.setY(y- rectangleSize);
+            
+            xMin = rectangle.getX();
+            xMax = rectangle.getX() + rectangle.getWidth();
+            yMin = rectangle.getY();
+            yMax = rectangle.getY() + rectangle.getHeight();
+            
+            initializeLines(xMin, xMax, yMin, yMax);
+
+            // Print the boundaries after initializing the rectangle
+            System.out.println("xMin: " + xMin);
+            System.out.println("xMax: " + xMax);
+            System.out.println("yMin: " + yMin);
+            System.out.println("yMax: " + yMax);
+
         } else {
             System.err.println("Error: Stage or Rectangle is null. Check initialization.");
         }
     }
 
+    public double getRectangleWidth() {
+        return rectangle != null ? rectangle.getWidth() : 0;
+    }
+
+    public double getRectangleHeight() {
+        return rectangle != null ? rectangle.getHeight() : 0;
+    }
+    
+    public int getXMin() {
+        return (int) xMin;
+    }
+
+    public int getXMax() {
+        return (int) xMax;
+    }
+
+    public int getYMin() {
+        return (int) yMin;
+    }
+
+    public int getYMax() {
+        return (int) yMax;
+    }
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -212,6 +251,25 @@ public class Room0Controller {
 
         }
 
+    }
+
+    private void initializeLines(double xMin, double xMax, double yMin, double yMax){
+        Line top = new Line(0, 1, -yMin);
+        Line bottom = new Line(0, 1, -yMax);
+        Line left = new Line(1, 0, -xMin);
+        Line right = new Line(1, 0, -xMax);
+
+        roomWalls = List.of(top, bottom, left, right);
+
+
+        System.out.println("Top Line: " + top.toString());
+        System.out.println("Bottom Line: " + bottom.toString());
+        System.out.println("Left Line: " + left.toString());
+        System.out.println("Right Line: " + right.toString());
+    }
+
+    public List<Line> getRoomWalls() {
+        return roomWalls;
     }
 
 
@@ -278,7 +336,7 @@ public class Room0Controller {
         // Check if the click was inside the rectangle using the built-in contains() method
         if (rectangle.contains(x, y)) {
             // Save the coordinates if the click was on the rectangle
-            waveManager.createWave(x,y,200);
+            waveManager.createWave(x,y,this);
             timer.play();
             buttonStop.setDisable(false);
             buttonResume.setDisable(true);
@@ -299,20 +357,5 @@ public class Room0Controller {
             waveTimeline.setCycleCount(Timeline.INDEFINITE); // Run forever
             waveTimeline.play(); // Start the timeline
         }
-    }
-    //reseni drzeni obdelnika
-    @FXML
-    public void handleMouseHold(MouseEvent event) {
-        // Check if the mouse press event occurs inside the rectangle
-        if (rectangle.contains(event.getX(), event.getY())) {
-            System.out.println("Mouse is being held on the rectangle.");
-
-            // Example action: create a wave on hold
-            waveManager.createWave(event.getX(), event.getY(), 300);
-        } else {
-            System.out.println("Mouse is not on the rectangle during hold.");
-        }
-
-        // Optionally, you can initiate other behaviors while holding the mouse here.
     }
 }
