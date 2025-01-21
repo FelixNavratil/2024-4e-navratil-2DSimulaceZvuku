@@ -14,15 +14,13 @@ public class WaveManager {
     private WaveFactory waveFactory;
 
     // Flag to track whether waves are currently running
-    private boolean isRunning;
+    private boolean isRunning = false;
 
-
-
-    //pripojeni centerpane
+    // pripojeni centerpane
     @FXML
     private Pane centerPane = new Pane();
 
-    public  WaveManager(WaveFactory waveFactory, Pane centerPane) {
+    public WaveManager(WaveFactory waveFactory, Pane centerPane) {
         // Initialize fields
         this.waveFactory = waveFactory;
         this.activeWaves = new ArrayList<>();
@@ -32,6 +30,7 @@ public class WaveManager {
 
     /**
      * Handles creation of a new wave at the given position.
+     *
      * @param x The starting X position of the wave.
      * @param y The starting Y position of the wave.
      */
@@ -48,20 +47,60 @@ public class WaveManager {
     }
 
     /**
-     * Updates all active waves (e.g., grows their size) and removes completed or expired waves.
+     * Updates all active waves (e.g., grows their size) and removes completed or
+     * expired waves.
      */
-    public void updateWaves() {
-        // Use an iterator to safely modify the list during iteration
-        activeWaves.removeIf(wave -> {
-            // Update wave radius
-            wave.grow();
-            // Remove the wave if it has reached its max radius or if it's older than 5 seconds
+    public void updateWaves(Room0Controller controller) {
+        List<SoundWave> wavesToRemove = new ArrayList<>(); // Temporary list for waves to remove
+
+        // Iterate over all active waves and update their state
+        for (SoundWave wave : activeWaves) {
+            wave.grow(); // Grow the wave's radius
+
+            // Check and remove wave if its age goes beyond 7 seconds
             if (wave.isOlderThan(7000)) {
-                centerPane.getChildren().remove(wave); // Remove from the UI
-                return true; // Remove the wave from the list
+                wavesToRemove.add(wave); // Mark wave for removal
+                if (centerPane != null) {
+                    centerPane.getChildren().remove(wave); // Remove from UI
+                }
             }
-            return false;
-        });
+        }
+
+        // Check for corner-related events
+        checkWavesForCorners(controller);
+
+        // Remove all marked waves
+        activeWaves.removeAll(wavesToRemove);
+    }
+
+    /**
+     * Checks if any wave has reached a corner and handles the event.
+     */
+    public void checkWavesForCorners(Room0Controller controller) {
+        // Iterate over a copy of the activeWaves to avoid modification issues
+        for (SoundWave wave : new ArrayList<>(activeWaves)) {
+            // Get distances to all four corners
+            int[] cornerDistances = wave.getCornerDistances();
+            int currentRadius = wave.getCurrentRadius();
+
+            // Check if the wave has reached any corner
+            if (currentRadius == cornerDistances[0]) { // Top-Left Corner
+                System.out.println("Wave reached the Top-Left Corner.");
+                createWave(controller.getXMin(), controller.getYMin(), controller); // Create new wave
+            }
+            if (currentRadius == cornerDistances[1]) { // Bottom-Left Corner
+                System.out.println("Wave reached the Bottom-Left Corner.");
+                createWave(controller.getXMin(), controller.getYMax(), controller); // Create new wave
+            }
+            if (currentRadius == cornerDistances[2]) { // Bottom-Right Corner
+                System.out.println("Wave reached the Bottom-Right Corner.");
+                createWave(controller.getXMax(), controller.getYMax(), controller); // Create new wave
+            }
+            if (currentRadius == cornerDistances[3]) { // Top-Right Corner
+                System.out.println("Wave reached the Top-Right Corner.");
+                createWave(controller.getXMax(), controller.getYMin(), controller); // Create new wave
+            }
+        }
     }
 
     /**
@@ -90,6 +129,7 @@ public class WaveManager {
 
     /**
      * Returns whether waves are currently running.
+     *
      * @return True if waves are running, false otherwise.
      */
     public boolean isRunning() {
@@ -98,9 +138,12 @@ public class WaveManager {
 
     /**
      * Returns the list of active waves.
+     *
      * @return List of active ZvukovaVlna objects.
      */
     public List<SoundWave> getActiveWaves() {
         return activeWaves;
     }
+
+
 }

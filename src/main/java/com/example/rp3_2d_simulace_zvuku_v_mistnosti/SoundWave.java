@@ -12,15 +12,18 @@ import java.util.List;
 public class SoundWave extends Circle {
     private double x;          // Starting X position
     private double y;          // Starting Y position
-    private double currentRadius;   // The current radius of the wave
+    private int currentRadius = 1;   // The current radius of the wave
     private long creationTime; // Timestamp when the wave was created
-    private IntersectionCalculator calculator = new IntersectionCalculator();
+    private Calculator calculator = new Calculator();
     private Room0Controller controller = new Room0Controller();
     private List<Line> waveLines;
     private List<Line> roomWalls;
     private Point center;
     private Point[] intersections;
-
+    private Point topLeft;
+    private Point topRight;
+    private Point bottomLeft;
+    private Point bottomRight;
     
     private void initializeLines(double x, double y){
         Line vertical = new Line(1,0,-x);
@@ -30,8 +33,23 @@ public class SoundWave extends Circle {
         System.out.println("Horizontal Line: " + horizontal.toString());
     }
 
+    //zjisteni kdy vlna dosahne rohu
+    public int[] getCornerDistances () {
+        int[] distances = new int[4];
+
+
+        // Calculate distances using the Point class's distance method
+        distances[0] = (int)center.distance(topLeft);      // Distance to top-left corner
+        distances[1] = (int)center.distance(bottomLeft);   // Distance to bottom-left corner
+        distances[2] = (int)center.distance(bottomRight);  // Distance to bottom-right corner
+        distances[3] = (int)center.distance(topRight);     // Distance to top-right corner
+
+        return distances;
+    }
+
     //ziskani pruseciku
     private Point[] getIntersectionsWithWalls(double x, double y){
+
 
         System.out.println("x: " + x);
         System.out.println("y: " + y);
@@ -83,15 +101,21 @@ public class SoundWave extends Circle {
                     y > controller.getYMin() &&
                     y < controller.getYMax()) {
 
-            Point topIntersection = calculator.calculateIntersection(waveLines.get(0), roomWalls.get(0));
             Point leftIntersection = calculator.calculateIntersection(waveLines.get(1), roomWalls.get(2));
-            Point bottomIntersection = calculator.calculateIntersection(waveLines.get(0), roomWalls.get(1));
-            return new Point[]{topIntersection, leftIntersection, bottomIntersection};
+            return new Point[]{leftIntersection};
         }else {
             return null;
         }
     }
-
+    
+    
+    public Point getCenter() {
+        return center;
+    }
+    
+    public Point[] getIntersections() {
+        return intersections;
+    }
 
     public List<Line> getWaveLines() {
         return waveLines;
@@ -101,6 +125,7 @@ public class SoundWave extends Circle {
         super(x, y, 0); // Initialize circle with position (x, y) and radius 0
         this.x = x;
         this.y = y;
+        //zjistí jaký kontroller používá (V jaké místnosti je)
         this.controller = controller;
         roomWalls = controller.getRoomWalls();
         //iniccializace stredu
@@ -112,13 +137,20 @@ public class SoundWave extends Circle {
         this.setFill(Color.TRANSPARENT);  // Transparent inside
         updateColor(1);
         this.setMouseTransparent(true);// Optional: Ignore mouse events on the wave
+        
+        topLeft = controller.getRoomCorners().get(0);
+        bottomLeft = controller.getRoomCorners().get(1);
+        bottomRight = controller.getRoomCorners().get(2);
+        topRight = controller.getRoomCorners().get(3);
+        
+        
+        //vypocitani pruseciků
         intersections =  getIntersectionsWithWalls(x,y);
         if (intersections != null) {
             for (Point intersection : intersections) {
                 System.out.println(intersection.toString());
             }
         }
-
     }
 
     /**
@@ -157,7 +189,7 @@ public class SoundWave extends Circle {
         return y;
     }
 
-    public double getCurrentRadius() {
+    public int getCurrentRadius() {
         return currentRadius;
     }
 

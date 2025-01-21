@@ -41,6 +41,7 @@ public class Room0Controller {
     private double yMin;
     private double yMax;
     private List<Line> roomWalls;
+    private List<Point> roomCorners;
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -258,18 +259,33 @@ public class Room0Controller {
         Line bottom = new Line(0, 1, -yMax);
         Line left = new Line(1, 0, -xMin);
         Line right = new Line(1, 0, -xMax);
+        
+        Point topRight = new Point(top, right);
+        Point topLeft = new Point(top, left);
+        Point bottomLeft = new Point(bottom, left);
+        Point bottomRight = new Point(bottom, right);
 
+        roomCorners = List.of(topLeft, bottomLeft,bottomRight, topRight );
         roomWalls = List.of(top, bottom, left, right);
 
-
+        /*
+        System.out.println("Top Left Corner: " + topLeft.toString());
+        System.out.println("Top Right Corner: " + topRight.toString());
+        System.out.println("Bottom Left Corner: " + bottomLeft.toString());
+        System.out.println("Bottom Right Corner: " + bottomRight.toString());
         System.out.println("Top Line: " + top.toString());
         System.out.println("Bottom Line: " + bottom.toString());
         System.out.println("Left Line: " + left.toString());
         System.out.println("Right Line: " + right.toString());
+         */
     }
 
     public List<Line> getRoomWalls() {
         return roomWalls;
+    }
+
+    public List<Point> getRoomCorners() {
+        return roomCorners;
     }
 
 
@@ -284,22 +300,39 @@ public class Room0Controller {
     //Stop tlacitko
     @FXML
     public void handleButtonStopClick() throws IOException {
-        timer.stop();  // Stop the timer
-        buttonStop.setDisable(false);  // Re-enable the start button
-        buttonStop.setDisable(true);  // Disable the stop button
-        buttonResume.setDisable(false);  //Enable resume button
+        // Stop the main timer
+        timer.stop();
+
+        // Stop the wave timeline
+        if (waveTimeline != null) {
+            waveTimeline.pause(); // Pause wave updates
+        }
+
+        // Update the button states
+        buttonStop.setDisable(true);
+        buttonResume.setDisable(false);
         buttonReset.setDisable(false);
-        waveTimeline.stop();
+
+        System.out.println("Wave and timer stopped.");
     }
 
     //Resume tlacitko
     @FXML
     public void handleButtonResumeClick() {
+        // Resume the main timer
         timer.play();
+
+        // Resume the wave updates
+        if (waveTimeline != null) {
+            waveTimeline.play(); // Resume wave expansion and updates
+        }
+
+        // Update the button states
         buttonStop.setDisable(false);
-        buttonReset.setDisable(false);
         buttonResume.setDisable(true);
-        waveTimeline.play();
+        buttonReset.setDisable(false);
+
+        System.out.println("Wave and timer resumed.");
     }
 
     //Restart tlacitko
@@ -311,7 +344,16 @@ public class Room0Controller {
         buttonStop.setDisable(true);  // Disable the stop button
         buttonResume.setDisable(true);  // Disable the resume button, as there's nothing to resume
         buttonReset.setDisable(true);
-        centerPane.getChildren().removeIf(node -> node != rectangle);
+
+        // Stop the wave timeline and clear the waves
+        if (waveTimeline != null) {
+            waveTimeline.stop(); // Stop the periodic updates
+            waveTimeline = null; // Reset the timeline instance
+        }
+
+        // Reset the WaveManager
+        waveManager.resetWaves(); // Clear all active waves
+        centerPane.getChildren().removeIf(node -> node != rectangle); // Remove waves from UI except for the rectangle
     }
 
     private void updateTimerLabel() {
@@ -324,7 +366,7 @@ public class Room0Controller {
         // Update the label text with milliseconds precision
         bottomText.setText(String.format("%02d:%02d:%02d.%03d", hours, minutes, seconds, milliseconds));
     }
-
+    
 
     // reseni kliknuti na obdelnik
     @FXML
@@ -350,7 +392,7 @@ public class Room0Controller {
             waveTimeline = new Timeline(new KeyFrame(Duration.millis(16), new EventHandler<ActionEvent>() {
                 @Override
                 public void handle(ActionEvent event) {
-                    waveManager.updateWaves();
+                    waveManager.updateWaves(Room0Controller.this);
                 }
             }));
 

@@ -3,10 +3,16 @@ package com.example.rp3_2d_simulace_zvuku_v_mistnosti;
 public class Point {
     private double x;
     private double y;
+    private Calculator calculator = new Calculator();
 
     public Point(double x, double y) {
-        this.x = x;
-        this.y = y;
+        setX(x);
+        setY(y);
+    }
+
+    public Point(Line line1, Line line2){
+        setX(calculator.calculateIntersection(line1, line2).getX());
+        setY(calculator.calculateIntersection(line1, line2).getY());
     }
 
     public double getX() {
@@ -14,6 +20,14 @@ public class Point {
     }
     public double getY() {
         return y;
+    }
+
+    public void setX(double x) {
+        this.x = x;
+    }
+
+    public void setY(double y) {
+        this.y = y;
     }
 
     @Override

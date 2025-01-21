@@ -1,6 +1,6 @@
 package com.example.rp3_2d_simulace_zvuku_v_mistnosti;
 
-public class IntersectionCalculator {
+public class Calculator {
     /**
      * Calculate the intersection point of two lines in general form (Ax + By + C = 0).
      *
@@ -8,7 +8,7 @@ public class IntersectionCalculator {
      * @param line2 Second line
      * @return A double array [x, y] representing the intersection point, or null if no unique intersection exists.
      */
-    public static Point calculateIntersection(Line line1, Line line2) {
+    public Point calculateIntersection(Line line1, Line line2) {
         // Extract coefficients from each line
         double A1 = line1.getA();
         double B1 = line1.getB();
@@ -29,7 +29,6 @@ public class IntersectionCalculator {
         // Calculate the intersection point
         double x = (B1 * C2 - B2 * C1) / determinant;
         double y = (A2 * C1 - A1 * C2) / determinant;
-
 
 
         return new Point(x, y);
