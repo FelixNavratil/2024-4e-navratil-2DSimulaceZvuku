@@ -33,4 +33,31 @@ public class Calculator {
 
         return new Point(x, y);
     }
+
+    public Point calculateSymetricPoint(Point point, Line line){
+        // Extract line coefficients
+        double A = line.getA();
+        double B = line.getB();
+        double C = line.getC();
+
+        // Extract point coordinates
+        double x = point.getX();
+        double y = point.getY();
+
+        // Calculate projection point (foot of perpendicular)
+        double denominator = A * A + B * B;
+        if (denominator == 0) {
+            throw new IllegalArgumentException("Invalid line coefficients: A and B cannot both be zero.");
+        }
+
+        double x_proj = (B * (B * x - A * y) - A * C) / denominator;
+        double y_proj = (A * (-B * x + A * y) - B * C) / denominator;
+
+        // Calculate symmetric point
+        double x_sym = 2 * x_proj - x;
+        double y_sym = 2 * y_proj - y;
+
+        // Return the symmetric point
+        return new Point(x_sym, y_sym);
+    }
 }

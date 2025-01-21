@@ -306,6 +306,7 @@ public class Room0Controller {
         // Stop the wave timeline
         if (waveTimeline != null) {
             waveTimeline.pause(); // Pause wave updates
+            waveManager.pauseWaves();
         }
 
         // Update the button states
@@ -325,6 +326,7 @@ public class Room0Controller {
         // Resume the wave updates
         if (waveTimeline != null) {
             waveTimeline.play(); // Resume wave expansion and updates
+            waveManager.resumeWaves();
         }
 
         // Update the button states
@@ -378,7 +380,7 @@ public class Room0Controller {
         // Check if the click was inside the rectangle using the built-in contains() method
         if (rectangle.contains(x, y)) {
             // Save the coordinates if the click was on the rectangle
-            waveManager.createWave(x,y,this);
+            waveManager.createWave(x,y,this, 0);
             timer.play();
             buttonStop.setDisable(false);
             buttonResume.setDisable(true);

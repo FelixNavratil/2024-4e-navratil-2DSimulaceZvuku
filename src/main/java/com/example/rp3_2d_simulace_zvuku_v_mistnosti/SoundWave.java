@@ -14,8 +14,17 @@ public class SoundWave extends Circle {
     private double y;          // Starting Y position
     private int currentRadius = 1;   // The current radius of the wave
     private long creationTime; // Timestamp when the wave was created
+    private long elapsedPausedTime = 0; // Time we've spent paused
+    private long pauseStartTime; // When the wave was paused
+    private boolean isPaused = false; // Is the wave currently paused?
+
+
+
     private Calculator calculator = new Calculator();
     private Room0Controller controller = new Room0Controller();
+
+
+
     private List<Line> waveLines;
     private List<Line> roomWalls;
     private Point center;
@@ -46,23 +55,131 @@ public class SoundWave extends Circle {
 
         return distances;
     }
+    
+    public Point[] getSymetricPoints(){
+        
+        if (isInRectangle(x, y)) {
+            
+            Point[] symetricPoints = new Point[4];
+            symetricPoints[0] = calculator.calculateIntersection(waveLines.get(0), roomWalls.get(0));
+            symetricPoints[1] = calculator.calculateIntersection(waveLines.get(0), roomWalls.get(1));
+            symetricPoints[2] = calculator.calculateIntersection(waveLines.get(1), roomWalls.get(2));
+            symetricPoints[3] = calculator.calculateIntersection(waveLines.get(1), roomWalls.get(3));
+            
+            for (Point point : symetricPoints) {
+                if (point != null) {
+                    System.out.println("Symmetric point coordinates: " + point.toString());
+                }
+            }
+            return symetricPoints;
+            
+        } else if (isAboveRectangle(x, y)) {
+
+            Point[] symetricPoints = new Point[1];
+            symetricPoints[0] = calculator.calculateIntersection(waveLines.get(0), roomWalls.get(1));
+
+            if (symetricPoints[0] != null) {
+                System.out.println("Symmetric point coordinates: " + symetricPoints[0].toString());
+            }
+            return symetricPoints;
+            
+        } else if (isBellowRectangle(x, y)) {
+            
+            Point[] symetricPoints = new Point[1];
+            symetricPoints[0] = calculator.calculateIntersection(waveLines.get(0), roomWalls.get(0));
+
+            if (symetricPoints[0] != null) {
+                System.out.println("Symmetric point coordinates: " + symetricPoints[0].toString());
+            }
+            return symetricPoints;
+
+        } else if (isRightOfRectangle(x, y)) {
+            
+            Point[] symetricPoints = new Point[1];
+            symetricPoints[0] = calculator.calculateIntersection(waveLines.get(1), roomWalls.get(2));
+
+            if (symetricPoints[0] != null) {
+                System.out.println("Symmetric point coordinates: " + symetricPoints[0].toString());
+            }
+            return symetricPoints;
+
+        } else if (isLeftOfRectangle(x, y)) {
+            
+            Point[] symetricPoints = new Point[1];
+            symetricPoints[0] = calculator.calculateIntersection(waveLines.get(1), roomWalls.get(3));
+            if (symetricPoints[0] != null) {
+                System.out.println("Symmetric point coordinates: " + symetricPoints[0].toString());
+            }
+            return symetricPoints;
+            
+        } else {
+            return null;
+        }
+    }
+    
+    public int[] getReflectionDistances(){
+        //jestli je to v mistnosti
+        if (isInRectangle(x,y) ) {
+            
+            int[] distances = new int[4];
+            distances[0] = (int) center.distance(getIntersectionsWithWalls(x,y)[0]);
+            distances[1] = (int) center.distance(getIntersectionsWithWalls(x,y)[1]);
+            distances[2] = (int) center.distance(getIntersectionsWithWalls(x,y)[2]);
+            distances[3] = (int) center.distance(getIntersectionsWithWalls(x,y)[3]);
+
+
+           /* System.out.println("Distance to top intersection: " + distances[0]);
+            System.out.println("Distance to bottom intersection: " + distances[1]);
+            System.out.println("Distance to left intersection: " + distances[2]);
+            System.out.println("Distance to right intersection: " + distances[3]);*/
+            return distances;
+
+            //mezi lefou a pravou primkou ale nad horni primnkou
+        } else if ( isAboveRectangle(x,y)){
+            int[] distances = new int[1];
+            distances[0] = (int) center.distance(getIntersectionsWithWalls(x,y)[0]);
+            return distances;
+
+            //mezi levou a pravou primkou ale pod spodni primkou
+        } else if (isBellowRectangle(x,y)) {
+            int[] distances = new int[1];
+            distances[0] = (int) center.distance(getIntersectionsWithWalls(x,y)[0]);
+            return distances;
+
+            //nalevo od leve primky ale mezi horni a spodni primkou
+        } else if ( isLeftOfRectangle(x,y)) {
+            int[] distances = new int[1];
+            distances[0] = (int) center.distance(getIntersectionsWithWalls(x,y)[0]);
+            return distances;
+
+            //napravo od prave primky ale mezi horni a spodni primkou
+        } else if ( isRightOfRectangle(x,y)) {
+            int[] distances = new int[1];
+           distances[0] = (int) center.distance(getIntersectionsWithWalls(x,y)[0]);
+           return distances;
+        }else{
+
+            System.err.println("Error: The x and y coordinates are not valid.");
+            System.out.println("x coordinate: " + x);
+            System.out.println("y coordinate: " + y);
+            System.err.println("Error: The x and y coordinates are not valid.");
+            return null;
+        }
+    }
 
     //ziskani pruseciku
     private Point[] getIntersectionsWithWalls(double x, double y){
 
 
-        System.out.println("x: " + x);
+        /*System.out.println("x: " + x);
         System.out.println("y: " + y);
         System.out.println("xMax: " + controller.getXMax());
         System.out.println("xMin: " + controller.getXMin());
         System.out.println("yMax: " + controller.getYMax());
-        System.out.println("yMin: " + controller.getYMin());
+        System.out.println("yMin: " + controller.getYMin());*/
 
         //jestli souradnice stredu jsou v mistnosti
-        if (    x > controller.getXMin() &&
-                x < controller.getXMax() &&
-                y > controller.getYMin() &&
-                y < controller.getYMax() ) {
+        if (isInRectangle(x,y)) {
 
             Point topIntersection = calculator.calculateIntersection(waveLines.get(0), roomWalls.get(0));
             Point bottomIntersection = calculator.calculateIntersection(waveLines.get(0), roomWalls.get(1));
@@ -72,34 +189,26 @@ public class SoundWave extends Circle {
             return new Point[]{topIntersection, bottomIntersection, leftIntersection, rightIntersection};
 
             //mezi lefou a pravou primkou ale nad horni primnkou
-        } else if ( x > controller.getXMin() &&
-                    x < controller.getXMax() &&
-                    y < controller.getYMin()){
+        } else if ( isAboveRectangle(x,y)){
 
             Point bottomIntersection = calculator.calculateIntersection(waveLines.get(0), roomWalls.get(1));
 
             return new Point[]{bottomIntersection};
 
             //mezi levou a pravou primkou ale pod spodni primkou
-        } else if ( x > controller.getXMin() &&
-                    x < controller.getXMax() &&
-                    y > controller.getYMax()) {
+        } else if ( isBellowRectangle(x,y)) {
 
             Point topIntersection = calculator.calculateIntersection(waveLines.get(0), roomWalls.get(0));
             return new Point[]{topIntersection};
 
             //nalevo od leve primky ale mezi horni a spodni primkou
-        } else if ( x < controller.getXMin() &&
-                    y > controller.getYMin() &&
-                    y < controller.getYMax()) {
+        } else if ( isLeftOfRectangle(x,y)) {
 
             Point rightIntersection = calculator.calculateIntersection(waveLines.get(1), roomWalls.get(3));
             return new Point[]{rightIntersection};
 
             //napravo od prave primky ale mezi horni a spodni primkou
-        } else if ( x > controller.getXMax() &&
-                    y > controller.getYMin() &&
-                    y < controller.getYMax()) {
+        } else if ( isRightOfRectangle(x,y)) {
 
             Point leftIntersection = calculator.calculateIntersection(waveLines.get(1), roomWalls.get(2));
             return new Point[]{leftIntersection};
@@ -121,10 +230,11 @@ public class SoundWave extends Circle {
         return waveLines;
     }
 
-    public SoundWave(double x, double y, Room0Controller controller) {
+    public SoundWave(double x, double y, Room0Controller controller, int radius) {
         super(x, y, 0); // Initialize circle with position (x, y) and radius 0
         this.x = x;
         this.y = y;
+        this.currentRadius = radius;
         //zjistí jaký kontroller používá (V jaké místnosti je)
         this.controller = controller;
         roomWalls = controller.getRoomWalls();
@@ -193,14 +303,56 @@ public class SoundWave extends Circle {
         return currentRadius;
     }
 
+    public void pause() {
+        if (!isPaused) {
+            pauseStartTime = System.currentTimeMillis();
+            isPaused = true;
+        }
+    }
+
+    public void resume() {
+        if (isPaused) {
+            long now = System.currentTimeMillis();
+            elapsedPausedTime += (now - pauseStartTime); // Add the time spent paused
+            isPaused = false;
+        }
+    }
+    
+    public boolean isInRectangle(double x, double y){
+        return x > controller.getXMin() && x < controller.getXMax() && y > controller.getYMin() && y < controller.getYMax();
+    }
+    
+    public boolean isBellowRectangle(double x, double y){
+        return x > controller.getXMin() && x < controller.getXMax() && y > controller.getYMax();
+    }
+    
+    public boolean isAboveRectangle(double x, double y){
+        return x > controller.getXMin() && x < controller.getXMax() && y < controller.getYMin();
+    }
+    
+    public boolean isLeftOfRectangle(double x, double y){
+        return x < controller.getXMin() && y > controller.getYMin() && y < controller.getYMax();
+    }
+    
+    public boolean isRightOfRectangle(double x, double y){
+        return x > controller.getXMax() && y > controller.getYMin() && y < controller.getYMax();
+    }
+
+
 
     /**
      * Checks if the wave is older than a specified lifetime (in milliseconds).
-     * @param lifespan The lifetime in milliseconds (e.g., 5000 for 5 seconds).
+     * @param maxAge The lifetime in milliseconds (e.g., 5000 for 5 seconds).
      * @return True if the wave is older than the given lifespan, false otherwise.
      */
-    public boolean isOlderThan(long lifespan) {
-        long currentTime = System.currentTimeMillis();
-        return (currentTime - creationTime) > lifespan; // Check if the wave is older than the lifespan
+    public boolean isOlderThan(long maxAge) {
+        long now = System.currentTimeMillis();
+        long effectiveAge;
+        if (isPaused) {
+            effectiveAge = (pauseStartTime - creationTime) - elapsedPausedTime; // Paused state
+        } else {
+            effectiveAge = (now - creationTime) - elapsedPausedTime; // Running state
+        }
+        return effectiveAge > maxAge;
     }
 }
