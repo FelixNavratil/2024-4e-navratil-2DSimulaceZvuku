@@ -12,6 +12,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.stage.Screen;
@@ -24,11 +25,11 @@ import java.util.List;
 public class Room0Controller {
 
     //inicializace promennych
-    Room0 mistnost0Class = new Room0();
-    private int mistnost0SceneHeight = mistnost0Class.getMistnost0ScreenHeight();
-    private int mistnost0SceneWidth = mistnost0Class.getMistnost0ScreenWidth();
-    private double rectangleHeight = (double)mistnost0SceneHeight/4;
-    private double rectangleSize = (double) mistnost0SceneWidth/4;
+    Room0 room0 = new Room0();
+    private int room0Height = room0.getMistnost0ScreenHeight();
+    private int room0Width = room0.getMistnost0ScreenWidth();
+    private double rectangleHeight = (double) room0Height /4;
+    private double rectangleSize = (double) room0Width /4;
     private static boolean vlnaExistuje = false;
     private boolean isRunning = true;
     private double currentRadius = 0;      // To track the current radius for resuming
@@ -42,15 +43,19 @@ public class Room0Controller {
     private double yMax;
     private List<Line> roomWalls;
     private List<Point> roomCorners;
+    Rectangle topRectangle;
+    Rectangle bottomRectangle;
+    Rectangle leftRectangle;
+    Rectangle rightRectangle;
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------
 
     //getters
-    public int getMistnost0SceneHeight(){
-        return mistnost0SceneHeight;
+    public int getRoom0Height(){
+        return room0Height;
     }
-    public int getMistnost0SceneWidth(){
-        return mistnost0SceneWidth;
+    public int getRoom0Width(){
+        return room0Width;
     }
     public Pane getCenterPane(){
         return centerPane;
@@ -162,19 +167,24 @@ public class Room0Controller {
         buttonResume.setDisable(true);
         buttonStop.setDisable(true);
         buttonReset.setDisable(true);
-        centerPane.setPrefHeight(mistnost0SceneHeight);
-        centerPane.setPrefWidth(mistnost0SceneWidth);
+        centerPane.setPrefHeight(room0Height);
+        centerPane.setPrefWidth(room0Width);
 
-        
+
+
         System.out.println("-----------inicializace skoncila-------------");
     }
 
     public void initializeRectangle(double x, double y) {
         if (rectangle != null) {
+            System.out.println("-------------------------------------------------------------");
+            System.out.println("initialize rectangle");
             rectangle.setWidth(rectangleSize);
             rectangle.setHeight(rectangleSize);
             rectangle.setX(x- rectangleSize / 2);
             rectangle.setY(y- rectangleSize);
+            
+
             
             xMin = rectangle.getX();
             xMax = rectangle.getX() + rectangle.getWidth();
@@ -188,6 +198,9 @@ public class Room0Controller {
             System.out.println("xMax: " + xMax);
             System.out.println("yMin: " + yMin);
             System.out.println("yMax: " + yMax);
+
+            createOverlay();
+            System.out.println("-------------------------------------------------------------");
 
         } else {
             System.err.println("Error: Stage or Rectangle is null. Check initialization.");
@@ -231,23 +244,47 @@ public class Room0Controller {
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------
 
+    private void createOverlay(){
+        topRectangle = new Rectangle(0,0,stage.getWidth(),yMin);
+        bottomRectangle = new Rectangle(0,yMax,stage.getWidth(),stage.getHeight()-yMax);
+        leftRectangle = new Rectangle(0,0,xMin,stage.getHeight());
+        rightRectangle = new Rectangle(xMax,0,stage.getWidth()-xMax,stage.getHeight());
+
+
+        topRectangle.setFill(javafx.scene.paint.Color.WHITE);
+        bottomRectangle.setFill(javafx.scene.paint.Color.WHITE);
+        leftRectangle.setFill(javafx.scene.paint.Color.WHITE);
+        rightRectangle.setFill(javafx.scene.paint.Color.WHITE);
+
+       centerPane.getChildren().addAll(topRectangle,bottomRectangle,leftRectangle,rightRectangle);
+    }
+
+    public void overlayRectangles(){
+        topRectangle.toFront();
+        bottomRectangle.toFront();
+        leftRectangle.toFront();
+        rightRectangle.toFront();
+    }
+
+ //--------------------------------------------------------------------------------------------------------------------------------------------------------
+
     //nastaveni velikosti jednotlivych tlacitek
     public void updateLayout() {
         System.out.println("update layout");
         if (root != null){
             //Velikost buttonHlavniMenu
 
-            buttonHlavniMenu.setPrefWidth(mistnost0SceneWidth /8);
-            buttonHlavniMenu.setPrefHeight(mistnost0SceneHeight/8);
+            buttonHlavniMenu.setPrefWidth(room0Width /8);
+            buttonHlavniMenu.setPrefHeight(room0Height /8);
 
             //velikost buttonStop a start
-            labelInstrukce.setPrefSize(mistnost0SceneWidth /8, mistnost0SceneHeight/8);
-            buttonStop.setPrefSize(mistnost0SceneWidth /8, mistnost0SceneHeight/8);
-            buttonResume.setPrefSize(mistnost0SceneWidth /8, mistnost0SceneHeight/8);
-            buttonReset.setPrefSize(mistnost0SceneWidth /8, mistnost0SceneHeight/8);
+            labelInstrukce.setPrefSize(room0Width /8, room0Height /8);
+            buttonStop.setPrefSize(room0Width /8, room0Height /8);
+            buttonResume.setPrefSize(room0Width /8, room0Height /8);
+            buttonReset.setPrefSize(room0Width /8, room0Height /8);
 
             //velikost bottom textu
-            bottomText.setPrefSize(mistnost0SceneWidth /8, mistnost0SceneHeight/8);
+            bottomText.setPrefSize(room0Width /8, room0Height /8);
             bottomText.setFont(new Font(20));
 
         }
@@ -287,6 +324,8 @@ public class Room0Controller {
     public List<Point> getRoomCorners() {
         return roomCorners;
     }
+
+
 
 
     //zmeni se scena na hlavni menu
@@ -355,8 +394,15 @@ public class Room0Controller {
 
         // Reset the WaveManager
         waveManager.resetWaves(); // Clear all active waves
-        centerPane.getChildren().removeIf(node -> node != rectangle); // Remove waves from UI except for the rectangle
-    }
+
+        // Remove all children from centerPane except the original rectangles
+        centerPane.getChildren().removeIf(node ->
+                node != rectangle &&
+                        node != topRectangle &&
+                        node != bottomRectangle &&
+                        node != leftRectangle &&
+                        node != rightRectangle
+        );    }
 
     private void updateTimerLabel() {
         // Calculate hours, minutes, seconds, and milliseconds from elapsed time

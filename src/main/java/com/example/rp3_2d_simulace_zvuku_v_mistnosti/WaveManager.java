@@ -34,6 +34,9 @@ public class WaveManager {
         SoundWave wave = waveFactory.createWave(x, y, controller, radius);
         activeWaves.add(wave);
         centerPane.getChildren().add(wave);
+
+        //making the rectangles appear above the waves
+        controller.overlayRectangles();
     }
 
     public void updateWaves(Room0Controller controller) {
@@ -49,7 +52,7 @@ public class WaveManager {
                 }
             }
         }
-        checkWavesForCorners(controller);
+        //checkWavesForCorners(controller);
         checkWavesForReflections(controller);
         activeWaves.removeAll(wavesToRemove);
     }

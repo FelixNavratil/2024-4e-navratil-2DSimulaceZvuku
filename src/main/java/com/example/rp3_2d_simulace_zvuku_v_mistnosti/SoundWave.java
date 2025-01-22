@@ -243,7 +243,7 @@ public class SoundWave extends Circle {
         this.creationTime = System.currentTimeMillis(); // Store creation time
         initializeLines(x,y);
         // Set the stroke (outline) color and make the fill transparent
-        this.setStrokeWidth(5);           // Outline thickness
+        this.setStrokeWidth(10);           // Outline thickness
         this.setFill(Color.TRANSPARENT);  // Transparent inside
         updateColor(1);
         this.setMouseTransparent(true);// Optional: Ignore mouse events on the wave
