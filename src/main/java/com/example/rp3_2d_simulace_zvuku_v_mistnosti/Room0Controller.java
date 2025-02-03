@@ -170,8 +170,6 @@ public class Room0Controller {
         centerPane.setPrefHeight(room0Height);
         centerPane.setPrefWidth(room0Width);
 
-
-
         System.out.println("-----------inicializace skoncila-------------");
     }
 

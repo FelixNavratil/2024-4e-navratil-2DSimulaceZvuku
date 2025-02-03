@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.shape.Rectangle?>
+<BorderPane fx:id="root"
+            xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.example.rp3_2d_simulace_zvuku_v_mistnosti.Room1Controller">
+
+    <center>
+        <Pane   fx:id="centerPane"
+                style="-fx-background-color: white;"
+                onMouseClicked="#handlePaneClick">
+
+            <Rectangle
+                    fx:id="rectangle"
+                    fill="white"
+                    stroke="black"
+                    strokeWidth="2"
+            />
+
+        </Pane>
+    </center>
+
+    <top>
+        <!-- HBox in the top section -->
+        <HBox fx:id="mistnost1TopHBox"
+              spacing="100"
+              alignment="CENTER"
+              style="-fx-background-color: lightgrey;"> <!-- Set the background color here -->
+
+            <Label fx:id="labelInstrukce"
+                   text="zacnete kliknutim na &#10;bilou cast obrazovky" />
+            <!-- Buttons in the top section -->
+            <Button fx:id="buttonStop"
+                    text="Stop"
+                    onAction="#handleButtonStopClick" />
+
+            <Button fx:id="buttonResume"
+                    text="Resume"
+                    onAction="#handleButtonResumeClick" />
+
+            <Button fx:id="buttonReset"
+                    text="Reset"
+                    onAction="#handleButtonResetClick" />
+        </HBox>
+    </top>
+
+    <bottom>
+        <HBox fx:id="mistnost1BottomHBox"
+              spacing="100"
+              alignment="CENTER"
+              style="-fx-background-color: lightgrey;">
+
+            <Label
+                    fx:id="bottomText"
+                    text="00:00:00.000" />
+
+            <Button fx:id="buttonHlavniMenu"
+                    text="Hlavni Menu"
+                    onAction="#handleButtonHlavniMenuClick" />
+        </HBox>
+    </bottom>
+</BorderPane>

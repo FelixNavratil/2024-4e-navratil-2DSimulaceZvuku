@@ -21,6 +21,8 @@ public class MainMenuController {
         updateLayout();
     }
 
+
+
     // Reference to the Stage object to switch scenes
     private Stage stage;
 
@@ -30,7 +32,10 @@ public class MainMenuController {
     }
 
     @FXML
-    private Button buttonSpustit;// A button in the main menu
+    private Button buttonRoom0;// A button in the main menu
+
+    @FXML
+    private Button buttonRoom1;
 
     @FXML
     private VBox hlavniMenuVBox;// A VBox (layout container) in the main menu
@@ -41,20 +46,30 @@ public class MainMenuController {
         if (hlavniMenuVBox != null) {
             hlavniMenuVBox.setPrefWidth(hlavniMenuSceeneWidth * 0.8);  // Example: 80% of the scene width
             hlavniMenuVBox.setPrefHeight(hlavniMenuSceneHeight * 0.8); // Example: 80% of the scene height
-            buttonSpustit.setPrefHeight(hlavniMenuSceneHeight /5);
-            buttonSpustit.setPrefWidth(hlavniMenuSceeneWidth /5);
+            buttonRoom0.setPrefHeight(hlavniMenuSceneHeight /5);
+            buttonRoom0.setPrefWidth(hlavniMenuSceeneWidth /5);
+            buttonRoom1.setPrefHeight(hlavniMenuSceneHeight /5);
+            buttonRoom1.setPrefWidth(hlavniMenuSceeneWidth /5);
         }
+    }
+
+    @FXML
+    protected void handleButtonRoom1Click() throws IOException {
+        System.out.println(" spustit Room1 ");
+        Room1 room1 = new Room1();
+        room1.setScene(stage);
+
     }
 
     // Method for handling button clicks
     @FXML
-    protected void handleButtonClick() throws IOException {
-        System.out.println("SPUSTIT");
+    protected void handleButtonRoom0Click() throws IOException {
+        System.out.println("spustit Room0");
 
         // Create an instance of Mistnost0 to switch scenes
-        Room0 mistnost0 = new Room0();
+        Room0 room0 = new Room0();
 
         // Switch to Mistnost0 scene by passing the current stage
-        mistnost0.setScene(stage);
+        room0.setScene(stage);
     }
 }

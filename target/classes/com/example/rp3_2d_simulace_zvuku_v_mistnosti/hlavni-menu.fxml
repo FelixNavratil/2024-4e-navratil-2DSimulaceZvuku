@@ -12,8 +12,12 @@
       fx:controller="com.example.rp3_2d_simulace_zvuku_v_mistnosti.MainMenuController">
 
 
-    <Button fx:id="buttonSpustit"
-            text="SPUSTIT"
-            onAction="#handleButtonClick"/>
+    <Button fx:id="buttonRoom0"
+            text="MISTNOST 1"
+            onAction="#handleButtonRoom0Click"/>
+
+    <Button fx:id="buttonRoom1"
+            text="MISTNOST 2"
+            onAction="#handleButtonRoom1Click"/>
 
 </VBox>
