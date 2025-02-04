@@ -20,6 +20,8 @@ public class WaveManager {
     @FXML
     private Pane centerPane = new Pane();
 
+    private Calculator calculator = new Calculator();
+
     public WaveManager(WaveFactory waveFactory, Pane centerPane) {
         this.waveFactory = waveFactory;
         this.activeWaves = new ArrayList<>();
@@ -62,6 +64,7 @@ public class WaveManager {
 
     public void checkWavesForCorners(BaseRoomControllerInterface controller) {
         // Iterate over a copy of the activeWaves to avoid modification issues
+
         for (SoundWave wave : new ArrayList<>(activeWaves)) {
             // Get distances to all four corners
             int[] cornerDistances = wave.getCornerDistances();
@@ -69,19 +72,19 @@ public class WaveManager {
 
             // Check if the wave has reached any corner
             if (currentRadius == cornerDistances[0]) { // Top-Left Corner
-                //System.out.println("Wave reached the Top-Left Corner.");
+
                 createWave(controller.getXMin(), controller.getYMin(), controller, 0); // Create new wave
             }
             if (currentRadius == cornerDistances[1]) { // Bottom-Left Corner
-                //System.out.println("Wave reached the Bottom-Left Corner.");
+
                 createWave(controller.getXMin(), controller.getYMax(), controller,0); // Create new wave
             }
             if (currentRadius == cornerDistances[2]) { // Bottom-Right Corner
-                //System.out.println("Wave reached the Bottom-Right Corner.");
+
                 createWave(controller.getXMax(), controller.getYMax(), controller,0); // Create new wave
             }
             if (currentRadius == cornerDistances[3]) { // Top-Right Corner
-                //System.out.println("Wave reached the Top-Right Corner.");
+
                 createWave(controller.getXMax(), controller.getYMin(), controller,0); // Create new wave
             }
         }
@@ -115,6 +118,61 @@ public class WaveManager {
             }
         }
     }
+    
+    private void handleOutOfRectangleWaveForCorners(SoundWave wave, Point center, BaseRoomControllerInterface controller) {
+        Point topLefr = controller.getRoomCorners().get(0);
+        Point bottomLefr = controller.getRoomCorners().get(1);
+        Point bottomRight = controller.getRoomCorners().get(2);
+        Point topRight = controller.getRoomCorners().get(3);
+        int currentRadius = wave.getCurrentRadius();
+
+        if (wave.isAboveRectangle(center.getX(), center.getY())) {
+
+            if (currentRadius == (int) wave.getCenter().distance(controller.getRoomCorners().get(0))){
+                System.out.println("odrazeno horni");
+                reflectWave(wave, controller, 2);
+            }
+
+            if (wave.getRadius() == wave.getCenter().distance(controller.getRoomCorners().get(3))) {
+                System.out.println("odrazeno horni1");
+                reflectWave(wave, controller, 3);
+            }
+
+        } else if (wave.isBellowRectangle(center.getX(), center.getY())) {
+
+            if (currentRadius== (int) wave.getCenter().distance(controller.getRoomCorners().get(1))){
+                System.out.println("odrazeno spodni");
+                reflectWave(wave, controller, 2);
+            }
+
+            if (wave.getRadius() == wave.getCenter().distance(controller.getRoomCorners().get(2))) {
+                System.out.println("odrazeno spodni1");
+                reflectWave(wave, controller, 3);
+            }
+
+        } else if (wave.isLeftOfRectangle(center.getX(), center.getY())) {
+
+            if (currentRadius== (int) wave.getCenter().distance(controller.getRoomCorners().get(1))){
+                System.out.println("odrazeno leva");
+                reflectWave(wave, controller, 1);
+            }
+            if (wave.getRadius() == wave.getCenter().distance(controller.getRoomCorners().get(0))) {
+                System.out.println("odrazeno leva1");
+                reflectWave(wave, controller, 0);
+            }
+
+        } else if (wave.isRightOfRectangle(center.getX(), center.getY())) {
+
+            if (currentRadius== (int) wave.getCenter().distance(controller.getRoomCorners().get(2))){
+                System.out.println("odrazeno prava");
+                reflectWave(wave, controller, 1);
+            }
+            if (wave.getRadius() == wave.getCenter().distance(controller.getRoomCorners().get(3))) {
+                System.out.println("odrazeno prava1");
+                reflectWave(wave, controller, 0);
+            }
+        }
+    }
 
     private void handleOutOfRectangleWave(SoundWave wave, Point center, BaseRoomControllerInterface controller) {
         int[] reflectionDistances = wave.getReflectionDistances();
@@ -122,19 +180,29 @@ public class WaveManager {
         // Fix: Check if reflectionDistances is null
         if (reflectionDistances == null) {
             System.err.println("Warning: reflectionDistances is null for out-of-rectangle wave. Skipping reflection check.");
-            return;
+            //return;
         }
+
+        handleOutOfRectangleWaveForCorners(wave, center, controller);
 
         int currentRadius = wave.getCurrentRadius();
 
         if (wave.isAboveRectangle(center.getX(), center.getY()) && currentRadius == reflectionDistances[0]) {
+
             reflectWave(wave, controller, 1);
+
         } else if (wave.isBellowRectangle(center.getX(), center.getY()) && currentRadius == reflectionDistances[0]) {
+
             reflectWave(wave, controller, 0);
+
         } else if (wave.isLeftOfRectangle(center.getX(), center.getY()) && currentRadius == reflectionDistances[0]) {
+
             reflectWave(wave, controller, 3);
+
         } else if (wave.isRightOfRectangle(center.getX(), center.getY()) && currentRadius == reflectionDistances[0]) {
+
             reflectWave(wave, controller, 2);
+
         }
     }
 
@@ -150,7 +218,7 @@ public class WaveManager {
         for (SoundWave wave : activeWaves) {
             wave.resume();
         }
-        System.out.println("Wave propagation started.");
+        //System.out.println("Wave propagation started.");
     }
 
     public void pauseWaves() {
@@ -158,12 +226,12 @@ public class WaveManager {
         for (SoundWave wave : activeWaves) {
             wave.pause();
         }
-        System.out.println("Wave propagation stopped.");
+        //System.out.println("Wave propagation stopped.");
     }
 
     public void resetWaves() {
         activeWaves.clear();
-        System.out.println("All waves have been reset.");
+        //System.out.println("All waves have been reset.");
     }
 
     public boolean isRunning() {

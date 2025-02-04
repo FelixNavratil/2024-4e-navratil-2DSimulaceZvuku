@@ -125,7 +125,7 @@ public class Room0Controller implements BaseRoomControllerInterface {
     }
 
     public void setStage(Stage stage) {
-        System.out.println("set stage");
+
         this.stage = stage;
 
         // Check if fullscreen is enabled
@@ -142,7 +142,7 @@ public class Room0Controller implements BaseRoomControllerInterface {
             initializeRectangle(stage.getWidth()/2, stage.getHeight()/2);
 
             // Debugging output
-            System.out.println("Stage size set to: " + width + " x " + height);
+
         } else {
             // If fullscreen, let JavaFX handle the size
             System.out.println("Fullscreen mode is enabled. Dimensions managed by JavaFX.");
@@ -174,8 +174,6 @@ public class Room0Controller implements BaseRoomControllerInterface {
 
     private void initializeRectangle(double x, double y) {
         if (rectangle != null) {
-            System.out.println("-------------------------------------------------------------");
-            System.out.println("initialize rectangle");
             rectangle.setWidth(rectangleSize);
             rectangle.setHeight(rectangleSize);
             rectangle.setX(x- rectangleSize / 2);
@@ -190,14 +188,8 @@ public class Room0Controller implements BaseRoomControllerInterface {
             
             initializeLines(xMin, xMax, yMin, yMax);
 
-            // Print the boundaries after initializing the rectangle
-            System.out.println("xMin: " + xMin);
-            System.out.println("xMax: " + xMax);
-            System.out.println("yMin: " + yMin);
-            System.out.println("yMax: " + yMax);
-
             createOverlay();
-            System.out.println("-------------------------------------------------------------");
+
 
         } else {
             System.err.println("Error: Stage or Rectangle is null. Check initialization.");
@@ -302,16 +294,7 @@ public class Room0Controller implements BaseRoomControllerInterface {
         roomCorners = List.of(topLeft, bottomLeft,bottomRight, topRight );
         roomWalls = List.of(top, bottom, left, right);
 
-        /*
-        System.out.println("Top Left Corner: " + topLeft.toString());
-        System.out.println("Top Right Corner: " + topRight.toString());
-        System.out.println("Bottom Left Corner: " + bottomLeft.toString());
-        System.out.println("Bottom Right Corner: " + bottomRight.toString());
-        System.out.println("Top Line: " + top.toString());
-        System.out.println("Bottom Line: " + bottom.toString());
-        System.out.println("Left Line: " + left.toString());
-        System.out.println("Right Line: " + right.toString());
-         */
+
     }
 
     public List<Line> getRoomWalls() {
@@ -350,7 +333,6 @@ public class Room0Controller implements BaseRoomControllerInterface {
         buttonResume.setDisable(false);
         buttonReset.setDisable(false);
         isRunning = false;
-        System.out.println("Wave and timer stopped.");
     }
 
     //Resume tlacitko
@@ -370,7 +352,7 @@ public class Room0Controller implements BaseRoomControllerInterface {
         buttonResume.setDisable(true);
         buttonReset.setDisable(false);
         isRunning = true;
-        System.out.println("Wave and timer resumed.");
+
     }
 
     //Restart tlacitko

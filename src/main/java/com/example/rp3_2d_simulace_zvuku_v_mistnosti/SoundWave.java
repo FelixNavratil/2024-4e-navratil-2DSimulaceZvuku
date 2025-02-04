@@ -38,8 +38,7 @@ public class SoundWave extends Circle {
         Line vertical = new Line(1,0,-x);
         Line horizontal = new Line(0,1,-y);
         waveLines = List.of(vertical, horizontal);
-        System.out.println("Vertical Line: " + vertical.toString());
-        System.out.println("Horizontal Line: " + horizontal.toString());
+
     }
 
     //zjisteni kdy vlna dosahne rohu
@@ -118,6 +117,12 @@ public class SoundWave extends Circle {
     }
     
     public int[] getReflectionDistances(){
+
+        Point topLeft = controller.getRoomCorners().get(0);
+        Point bottomLeft = controller.getRoomCorners().get(1);
+        Point bottomRight = controller.getRoomCorners().get(2);
+        Point topRight = controller.getRoomCorners().get(3);
+
         //jestli je to v mistnosti
         if (isInRectangle(x,y) ) {
             
@@ -127,11 +132,6 @@ public class SoundWave extends Circle {
             distances[2] = (int) center.distance(getIntersectionsWithWalls(x,y)[2]);
             distances[3] = (int) center.distance(getIntersectionsWithWalls(x,y)[3]);
 
-
-           /* System.out.println("Distance to top intersection: " + distances[0]);
-            System.out.println("Distance to bottom intersection: " + distances[1]);
-            System.out.println("Distance to left intersection: " + distances[2]);
-            System.out.println("Distance to right intersection: " + distances[3]);*/
             return distances;
 
             //mezi lefou a pravou primkou ale nad horni primnkou
@@ -157,7 +157,40 @@ public class SoundWave extends Circle {
             int[] distances = new int[1];
            distances[0] = (int) center.distance(getIntersectionsWithWalls(x,y)[0]);
            return distances;
-        }else{
+
+           //napravo nahore
+        } else if (isAboveOnTheRightOfRectangle(x,y)){
+            int[] distances = new int[3];
+            distances[0] = (int) center.distance(topLeft);
+            distances[1] = (int) center.distance(bottomLeft);
+            distances[2] = (int) center.distance(bottomRight);
+            return distances;
+
+            //napravo dole
+        }else if (isBellowOnTheRightOfRectangle(x,y)){
+            int[] distances = new int[3];
+            distances[0] = (int) center.distance(topRight);
+            distances[1] = (int) center.distance(topLeft);
+            distances[2] = (int) center.distance(bottomLeft);
+            return distances;
+
+            //nalevo nahore
+        }else if (isAboveOnTheLeftOfRectangle(x,y)){
+            int[] distances = new int[3];
+            distances[0] = (int) center.distance(bottomLeft);
+            distances[1] = (int) center.distance(bottomRight);
+            distances[2] = (int) center.distance(topRight);
+            return distances;
+
+            //nalevo dole
+        }else if (isBellowOnTheLeftOfRectangle(x,y)){
+            int[] distances = new int[3];
+            distances[0] = (int) center.distance(bottomRight);
+            distances[1] = (int) center.distance(topRight);
+            distances[2] = (int) center.distance(topLeft);
+            return distances;
+
+        } else{
 
             System.err.println("Error: The x and y coordinates are not valid.");
             System.out.println("x coordinate: " + x);
@@ -171,12 +204,7 @@ public class SoundWave extends Circle {
     private Point[] getIntersectionsWithWalls(double x, double y){
 
 
-        /*System.out.println("x: " + x);
-        System.out.println("y: " + y);
-        System.out.println("xMax: " + controller.getXMax());
-        System.out.println("xMin: " + controller.getXMin());
-        System.out.println("yMax: " + controller.getYMax());
-        System.out.println("yMin: " + controller.getYMin());*/
+
 
         //jestli souradnice stredu jsou v mistnosti
         if (isInRectangle(x,y)) {
@@ -258,7 +286,7 @@ public class SoundWave extends Circle {
         intersections =  getIntersectionsWithWalls(x,y);
         if (intersections != null) {
             for (Point intersection : intersections) {
-                System.out.println(intersection.toString());
+                //System.out.println(intersection.toString());
             }
         }
     }
@@ -336,6 +364,22 @@ public class SoundWave extends Circle {
     
     public boolean isRightOfRectangle(double x, double y){
         return x > controller.getXMax() && y > controller.getYMin() && y < controller.getYMax();
+    }
+
+    public boolean isAboveOnTheRightOfRectangle(double x, double y){
+        return x > controller.getXMax() && y < controller.getYMin();
+    }
+
+    public boolean isAboveOnTheLeftOfRectangle(double x, double y){
+        return x < controller.getXMin() && y < controller.getYMin();
+    }
+
+    public boolean isBellowOnTheRightOfRectangle(double x, double y){
+        return x > controller.getXMax() && y > controller.getYMax();
+    }
+
+    public boolean isBellowOnTheLeftOfRectangle(double x, double y){
+        return x < controller.getXMin() && y > controller.getYMax();
     }
 
 

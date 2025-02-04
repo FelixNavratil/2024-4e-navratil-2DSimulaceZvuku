@@ -16,7 +16,6 @@ public class Room1 {
     public void setScene(Stage stage) throws IOException {
         // Load the FXML file
         FXMLLoader fxmlLoader = new FXMLLoader(MainMenu.class.getResource("mistnost1.fxml"));
-        System.out.println("Setting up fullscreen Room1");
 
         // Load the mistnost1Scene and create the Scene object
         Scene mistnost1Scene = new Scene(fxmlLoader.load());

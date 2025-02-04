@@ -115,7 +115,7 @@ public class Room1Controller implements BaseRoomControllerInterface {
 
     @FXML
     public void initialize() {
-        System.out.println("-----------inicializace zacala-------------");
+
         waveFactory = new WaveFactory();
         waveManager = new WaveManager(waveFactory, centerPane);
         updateLayout();
@@ -128,7 +128,7 @@ public class Room1Controller implements BaseRoomControllerInterface {
         centerPane.setPrefHeight(room1Height);
         centerPane.setPrefWidth(room1Width);
 
-        System.out.println("-----------inicializace skoncila-------------");
+
     }
 
     private void createTimeline() {
@@ -141,8 +141,7 @@ public class Room1Controller implements BaseRoomControllerInterface {
 
     public void initializeRectangle(double x, double y) {
         if (rectangle != null) {
-            System.out.println("-------------------------------------------------------------");
-            System.out.println("initialize rectangle");
+
             rectangle.setWidth(rectangleWidth);
             rectangle.setHeight(rectangleHeight);
             rectangle.setX(x- rectangleWidth / 2);
@@ -158,13 +157,10 @@ public class Room1Controller implements BaseRoomControllerInterface {
             initializeLines(xMin, xMax, yMin, yMax);
 
             // Print the boundaries after initializing the rectangle
-            System.out.println("xMin: " + xMin);
-            System.out.println("xMax: " + xMax);
-            System.out.println("yMin: " + yMin);
-            System.out.println("yMax: " + yMax);
+
 
             createOverlay();
-            System.out.println("-------------------------------------------------------------");
+
 
         } else {
             System.err.println("Error: Stage or Rectangle is null. Check initialization.");
@@ -278,7 +274,7 @@ public class Room1Controller implements BaseRoomControllerInterface {
         buttonResume.setDisable(false);
         buttonReset.setDisable(false);
         isRunning = false;
-        System.out.println("Wave and timer stopped.");
+
     }
 
     //Resume tlacitko
@@ -298,7 +294,7 @@ public class Room1Controller implements BaseRoomControllerInterface {
         buttonResume.setDisable(true);
         buttonReset.setDisable(false);
         isRunning = true;
-        System.out.println("Wave and timer resumed.");
+
     }
 
     //Restart tlacitko
