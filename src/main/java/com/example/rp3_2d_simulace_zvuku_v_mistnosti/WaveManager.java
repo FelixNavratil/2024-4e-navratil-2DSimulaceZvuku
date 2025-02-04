@@ -9,6 +9,7 @@ import java.util.List;
 public class WaveManager {
     // List to track all active waves in the room
     private List<SoundWave> activeWaves;
+    BaseRoomControllerInterface controller;
 
     // Reference to a WaveFactory to create new waves
     private WaveFactory waveFactory;
@@ -26,7 +27,7 @@ public class WaveManager {
         this.centerPane = centerPane;
     }
 
-    public void createWave(double x, double y, Room0Controller controller, int radius) {
+    public void createWave(double x, double y, BaseRoomControllerInterface controller, int radius) {
         if (centerPane == null) {
             System.err.println("Error: centerPane is null. Cannot add wave.");
             return;
@@ -39,7 +40,9 @@ public class WaveManager {
         controller.overlayRectangles();
     }
 
-    public void updateWaves(Room0Controller controller) {
+
+
+    public void updateWaves(BaseRoomControllerInterface controller) {
         List<SoundWave> wavesToRemove = new ArrayList<>();
 
         for (SoundWave wave : activeWaves) {
@@ -57,7 +60,7 @@ public class WaveManager {
         activeWaves.removeAll(wavesToRemove);
     }
 
-    public void checkWavesForCorners(Room0Controller controller) {
+    public void checkWavesForCorners(BaseRoomControllerInterface controller) {
         // Iterate over a copy of the activeWaves to avoid modification issues
         for (SoundWave wave : new ArrayList<>(activeWaves)) {
             // Get distances to all four corners
@@ -84,7 +87,7 @@ public class WaveManager {
         }
     }
 
-    public void checkWavesForReflections(Room0Controller controller) {
+    public void checkWavesForReflections(BaseRoomControllerInterface controller) {
         for (SoundWave wave : new ArrayList<>(activeWaves)) {
             Point center = wave.getCenter();
 
@@ -113,7 +116,7 @@ public class WaveManager {
         }
     }
 
-    private void handleOutOfRectangleWave(SoundWave wave, Point center, Room0Controller controller) {
+    private void handleOutOfRectangleWave(SoundWave wave, Point center, BaseRoomControllerInterface controller) {
         int[] reflectionDistances = wave.getReflectionDistances();
 
         // Fix: Check if reflectionDistances is null
@@ -135,7 +138,7 @@ public class WaveManager {
         }
     }
 
-    private void reflectWave(SoundWave wave, Room0Controller controller, int wallIndex) {
+    private void reflectWave(SoundWave wave, BaseRoomControllerInterface controller, int wallIndex) {
         Point center = wave.getCenter();
         Line reflectingWall = controller.getRoomWalls().get(wallIndex);
         Point symmetricPoint = new Calculator().calculateSymetricPoint(center, reflectingWall);

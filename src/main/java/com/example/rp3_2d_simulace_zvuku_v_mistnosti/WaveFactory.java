@@ -8,8 +8,10 @@ public class WaveFactory {
      * @param y         The starting Y coordinate of the wave.
      * @return A new instance of SoundWave.
      */
-    public SoundWave createWave(double x, double y, Room0Controller controller, int radius) {
+    public SoundWave createWave(double x, double y, BaseRoomControllerInterface controller, int radius) {
         // Instantiate a new SoundWave object with the provided parameters
         return new SoundWave(x, y, controller, radius);
     }
+
+
 }

@@ -21,7 +21,7 @@ public class SoundWave extends Circle {
 
 
     private Calculator calculator = new Calculator();
-    private Room0Controller controller = new Room0Controller();
+    private BaseRoomControllerInterface controller = new Room0Controller();
 
 
 
@@ -230,7 +230,7 @@ public class SoundWave extends Circle {
         return waveLines;
     }
 
-    public SoundWave(double x, double y, Room0Controller controller, int radius) {
+    public SoundWave(double x, double y, BaseRoomControllerInterface controller, int radius) {
         super(x, y, 0); // Initialize circle with position (x, y) and radius 0
         this.x = x;
         this.y = y;

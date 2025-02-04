@@ -12,7 +12,6 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.stage.Screen;
@@ -22,7 +21,7 @@ import javafx.util.Duration;
 import java.io.IOException;
 import java.util.List;
 
-public class Room0Controller {
+public class Room0Controller implements BaseRoomControllerInterface {
 
     //inicializace promennych
     Room0 room0 = new Room0();
@@ -173,7 +172,7 @@ public class Room0Controller {
         System.out.println("-----------inicializace skoncila-------------");
     }
 
-    public void initializeRectangle(double x, double y) {
+    private void initializeRectangle(double x, double y) {
         if (rectangle != null) {
             System.out.println("-------------------------------------------------------------");
             System.out.println("initialize rectangle");
@@ -350,7 +349,7 @@ public class Room0Controller {
         buttonStop.setDisable(true);
         buttonResume.setDisable(false);
         buttonReset.setDisable(false);
-
+        isRunning = false;
         System.out.println("Wave and timer stopped.");
     }
 
@@ -370,7 +369,7 @@ public class Room0Controller {
         buttonStop.setDisable(false);
         buttonResume.setDisable(true);
         buttonReset.setDisable(false);
-
+        isRunning = true;
         System.out.println("Wave and timer resumed.");
     }
 
@@ -383,6 +382,7 @@ public class Room0Controller {
         buttonStop.setDisable(true);  // Disable the stop button
         buttonResume.setDisable(true);  // Disable the resume button, as there's nothing to resume
         buttonReset.setDisable(true);
+        isRunning = false;
 
         // Stop the wave timeline and clear the waves
         if (waveTimeline != null) {
@@ -400,7 +400,8 @@ public class Room0Controller {
                         node != bottomRectangle &&
                         node != leftRectangle &&
                         node != rightRectangle
-        );    }
+        );
+    }
 
     private void updateTimerLabel() {
         // Calculate hours, minutes, seconds, and milliseconds from elapsed time
@@ -425,9 +426,19 @@ public class Room0Controller {
         if (rectangle.contains(x, y)) {
             // Save the coordinates if the click was on the rectangle
             waveManager.createWave(x,y,this, 0);
-            timer.play();
-            buttonStop.setDisable(false);
-            buttonResume.setDisable(true);
+
+
+            if (!isRunning && !buttonReset.isDisabled()){
+                buttonStop.setDisable(true);
+                buttonResume.setDisable(false);
+                timer.stop();
+            } else{
+                buttonResume.setDisable(true);
+                buttonStop.setDisable(false);
+                timer.play();
+                isRunning = true;
+            }
+
             buttonReset.setDisable(false);
         } else {
             System.out.println("Click was not on the rectangle.");
