@@ -22,6 +22,7 @@ public class WaveManager {
 
     private Calculator calculator = new Calculator();
 
+    // Initializes a WaveManager instance.
     public WaveManager(WaveFactory waveFactory, Pane centerPane) {
         this.waveFactory = waveFactory;
         this.activeWaves = new ArrayList<>();
@@ -29,6 +30,7 @@ public class WaveManager {
         this.centerPane = centerPane;
     }
 
+    //Creates a new sound wave at the given coordinates (x, y) with the specified radius.
     public void createWave(double x, double y, BaseRoomControllerInterface controller, int radius) {
         if (centerPane == null) {
             System.err.println("Error: centerPane is null. Cannot add wave.");
@@ -43,7 +45,7 @@ public class WaveManager {
     }
 
 
-
+    //Updates the current state of all active waves.
     public void updateWaves(BaseRoomControllerInterface controller) {
         List<SoundWave> wavesToRemove = new ArrayList<>();
 
@@ -62,6 +64,7 @@ public class WaveManager {
         activeWaves.removeAll(wavesToRemove);
     }
 
+    //Checks if waves have reached any corner of the room and generates new waves if so (to simulate corner reflections).
     public void checkWavesForCorners(BaseRoomControllerInterface controller) {
         // Iterate over a copy of the activeWaves to avoid modification issues
 
@@ -90,6 +93,7 @@ public class WaveManager {
         }
     }
 
+    //Handles wave reflections when they hit the walls of the room.
     public void checkWavesForReflections(BaseRoomControllerInterface controller) {
         for (SoundWave wave : new ArrayList<>(activeWaves)) {
             Point center = wave.getCenter();
@@ -118,10 +122,11 @@ public class WaveManager {
             }
         }
     }
-    
+
+    //Specialized handling for waves that hit the corners of the rectangle when outside.
     private void handleOutOfRectangleWaveForCorners(SoundWave wave, Point center, BaseRoomControllerInterface controller) {
-        Point topLefr = controller.getRoomCorners().get(0);
-        Point bottomLefr = controller.getRoomCorners().get(1);
+        Point topLeft = controller.getRoomCorners().get(0);
+        Point bottomLeft = controller.getRoomCorners().get(1);
         Point bottomRight = controller.getRoomCorners().get(2);
         Point topRight = controller.getRoomCorners().get(3);
         int currentRadius = wave.getCurrentRadius();
@@ -133,47 +138,115 @@ public class WaveManager {
                 reflectWave(wave, controller, 2);
             }
 
-            if (wave.getRadius() == wave.getCenter().distance(controller.getRoomCorners().get(3))) {
-                System.out.println("odrazeno horni1");
+            if (wave.getRadius() ==(int) wave.getCenter().distance(controller.getRoomCorners().get(3))) {
+                System.out.println("odrazeno horni1 -------");
                 reflectWave(wave, controller, 3);
             }
 
         } else if (wave.isBellowRectangle(center.getX(), center.getY())) {
 
             if (currentRadius== (int) wave.getCenter().distance(controller.getRoomCorners().get(1))){
-                System.out.println("odrazeno spodni");
+                //System.out.println("odrazeno spodni");
                 reflectWave(wave, controller, 2);
             }
 
-            if (wave.getRadius() == wave.getCenter().distance(controller.getRoomCorners().get(2))) {
-                System.out.println("odrazeno spodni1");
+            if (wave.getRadius() ==(int) wave.getCenter().distance(controller.getRoomCorners().get(2))) {
+                //System.out.println("odrazeno spodni1 -------");
                 reflectWave(wave, controller, 3);
             }
 
         } else if (wave.isLeftOfRectangle(center.getX(), center.getY())) {
 
             if (currentRadius== (int) wave.getCenter().distance(controller.getRoomCorners().get(1))){
-                System.out.println("odrazeno leva");
+                //System.out.println("odrazeno leva");
                 reflectWave(wave, controller, 1);
             }
-            if (wave.getRadius() == wave.getCenter().distance(controller.getRoomCorners().get(0))) {
-                System.out.println("odrazeno leva1");
+            if (wave.getRadius() == (int)wave.getCenter().distance(controller.getRoomCorners().get(0))) {
+                //System.out.println("odrazeno leva1 ------");
                 reflectWave(wave, controller, 0);
             }
 
         } else if (wave.isRightOfRectangle(center.getX(), center.getY())) {
+            System.out.println("current radius = " + currentRadius + "  distance =" + (int) wave.getCenter().distance(controller.getRoomCorners().get(3)));
 
             if (currentRadius== (int) wave.getCenter().distance(controller.getRoomCorners().get(2))){
-                System.out.println("odrazeno prava");
+                //System.out.println("odrazeno zprava dole");
                 reflectWave(wave, controller, 1);
             }
-            if (wave.getRadius() == wave.getCenter().distance(controller.getRoomCorners().get(3))) {
-                System.out.println("odrazeno prava1");
+            if (wave.getRadius() == (int)wave.getCenter().distance(controller.getRoomCorners().get(3))) {
+                //System.out.println("odrazeno zprava nahore");
                 reflectWave(wave, controller, 0);
             }
         }
     }
 
+    private void handleDiagonalWavesForCorners(SoundWave wave, Point center, BaseRoomControllerInterface controller) {
+        Point topLeft = controller.getRoomCorners().get(0);
+        Point bottomLeft = controller.getRoomCorners().get(1);
+        Point bottomRight = controller.getRoomCorners().get(2);
+        Point topRight = controller.getRoomCorners().get(3);
+        int currentRadius = wave.getCurrentRadius();
+
+        //nahore nalevo
+        if (wave.isAboveOnTheLeftOfRectangle(center.getX(), center.getY())) {
+
+            if (currentRadius== (int) wave.getCenter().distance(bottomLeft)){
+                reflectWave(wave, controller, 1);
+            }
+            if (wave.getRadius() == (int)wave.getCenter().distance(bottomRight)) {
+                Point pomocnyBod = calculator.calculateSymetricPoint(center, controller.getRoomWalls().get(1));
+                reflectWave(pomocnyBod, wave.getCurrentRadius(), controller, 3);
+            }
+            if (currentRadius== (int) wave.getCenter().distance(topRight)){
+                reflectWave(wave, controller, 3);
+            }
+
+            //dole nalevo
+        }else if (wave.isBellowOnTheLeftOfRectangle(center.getX(), center.getY())) {
+
+            if (currentRadius== (int) wave.getCenter().distance(bottomRight)){
+                reflectWave(wave, controller, 3);
+            }
+            if (wave.getRadius() == (int)wave.getCenter().distance(topRight)) {
+                Point pomocnyBod = calculator.calculateSymetricPoint(center, controller.getRoomWalls().get(3));
+                reflectWave(pomocnyBod, wave.getCurrentRadius(), controller, 0);
+            }
+            if (currentRadius== (int) wave.getCenter().distance(topLeft)){
+                reflectWave(wave, controller, 0);
+            }
+
+            //dole napravo
+        }else if (wave.isBellowOnTheRightOfRectangle(center.getX(), center.getY())) {
+
+            if (currentRadius== (int) wave.getCenter().distance(topRight)){
+                reflectWave(wave, controller, 0);
+            }
+            if (wave.getRadius() == (int)wave.getCenter().distance(topLeft)) {
+                Point pomocnyBod = calculator.calculateSymetricPoint(center, controller.getRoomWalls().get(0));
+                reflectWave(pomocnyBod, wave.getCurrentRadius(), controller, 2);
+            }
+            if (currentRadius== (int) wave.getCenter().distance(bottomLeft)){
+                reflectWave(wave, controller, 2);
+            }
+
+            //nahore napravo
+        }else if (wave.isAboveOnTheRightOfRectangle(center.getX(), center.getY())) {
+
+            if (currentRadius== (int) wave.getCenter().distance(topLeft)){
+                reflectWave(wave, controller, 2);
+            }
+            if (wave.getRadius() == (int)wave.getCenter().distance(bottomLeft)) {
+                Point pomocnyBod = calculator.calculateSymetricPoint(center, controller.getRoomWalls().get(2));
+                reflectWave(pomocnyBod, wave.getCurrentRadius(), controller, 1);
+            }
+            if (currentRadius== (int) wave.getCenter().distance(bottomRight)){
+                reflectWave(wave, controller, 1);
+            }
+
+        }
+    }
+
+    // Handles waves that are outside the boundaries of the rectangle.
     private void handleOutOfRectangleWave(SoundWave wave, Point center, BaseRoomControllerInterface controller) {
         int[] reflectionDistances = wave.getReflectionDistances();
 
@@ -184,7 +257,7 @@ public class WaveManager {
         }
 
         handleOutOfRectangleWaveForCorners(wave, center, controller);
-
+        handleDiagonalWavesForCorners(wave, center, controller);
         int currentRadius = wave.getCurrentRadius();
 
         if (wave.isAboveRectangle(center.getX(), center.getY()) && currentRadius == reflectionDistances[0]) {
@@ -206,12 +279,23 @@ public class WaveManager {
         }
     }
 
+    //Creates a reflected wave when an existing wave interacts with a wall.
     private void reflectWave(SoundWave wave, BaseRoomControllerInterface controller, int wallIndex) {
         Point center = wave.getCenter();
         Line reflectingWall = controller.getRoomWalls().get(wallIndex);
         Point symmetricPoint = new Calculator().calculateSymetricPoint(center, reflectingWall);
         createWave(symmetricPoint.getX(), symmetricPoint.getY(), controller, wave.getCurrentRadius());
     }
+
+    private void reflectWave(Point center, int currentRadius, BaseRoomControllerInterface controller, int wallIndex) {
+        Line reflectingWall = controller.getRoomWalls().get(wallIndex);
+        Point symmetricPoint = new Calculator().calculateSymetricPoint(center, reflectingWall);
+        createWave(symmetricPoint.getX(), symmetricPoint.getY(), controller, currentRadius);
+    }
+
+
+
+
 
     public void resumeWaves() {
         isRunning = true;
