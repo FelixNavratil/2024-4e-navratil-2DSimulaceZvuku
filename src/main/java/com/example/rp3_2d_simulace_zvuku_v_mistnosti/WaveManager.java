@@ -31,12 +31,12 @@ public class WaveManager {
     }
 
     //Creates a new sound wave at the given coordinates (x, y) with the specified radius.
-    public void createWave(double x, double y, BaseRoomControllerInterface controller, int radius) {
+    public void createWave(double x, double y, BaseRoomControllerInterface controller, int radius,int okamzitaVychylka, int amplitude, int direction) {
         if (centerPane == null) {
             System.err.println("Error: centerPane is null. Cannot add wave.");
             return;
         }
-        SoundWave wave = waveFactory.createWave(x, y, controller, radius);
+        SoundWave wave = waveFactory.createWave(x, y, controller, radius, okamzitaVychylka, amplitude, direction);
         activeWaves.add(wave);
         centerPane.getChildren().add(wave);
 
@@ -64,6 +64,7 @@ public class WaveManager {
         activeWaves.removeAll(wavesToRemove);
     }
 
+/*
     //Checks if waves have reached any corner of the room and generates new waves if so (to simulate corner reflections).
     public void checkWavesForCorners(BaseRoomControllerInterface controller) {
         // Iterate over a copy of the activeWaves to avoid modification issues
@@ -92,6 +93,7 @@ public class WaveManager {
             }
         }
     }
+*/
 
     //Handles wave reflections when they hit the walls of the room.
     public void checkWavesForReflections(BaseRoomControllerInterface controller) {
@@ -113,7 +115,7 @@ public class WaveManager {
                     if (currentRadius == reflectionDistances[i]) {
                         Line reflectingWall = controller.getRoomWalls().get(i);
                         Point symmetricPoint = new Calculator().calculateSymetricPoint(center, reflectingWall);
-                        createWave(symmetricPoint.getX(), symmetricPoint.getY(), controller, wave.getCurrentRadius());
+                        createWave(symmetricPoint.getX(), symmetricPoint.getY(), controller, wave.getCurrentRadius(), wave.getokamzitaVychylka(), wave.getAmplitude(),  wave.getDirection());
                         break;
                     }
                 }
@@ -195,7 +197,7 @@ public class WaveManager {
             }
             if (wave.getRadius() == (int)wave.getCenter().distance(bottomRight)) {
                 Point pomocnyBod = calculator.calculateSymetricPoint(center, controller.getRoomWalls().get(1));
-                reflectWave(pomocnyBod, wave.getCurrentRadius(), controller, 3);
+                reflectWave(pomocnyBod, wave.getCurrentRadius(), controller, 3,wave.getokamzitaVychylka(), wave.getAmplitude(), wave.getDirection());
             }
             if (currentRadius== (int) wave.getCenter().distance(topRight)){
                 reflectWave(wave, controller, 3);
@@ -209,7 +211,7 @@ public class WaveManager {
             }
             if (wave.getRadius() == (int)wave.getCenter().distance(topRight)) {
                 Point pomocnyBod = calculator.calculateSymetricPoint(center, controller.getRoomWalls().get(3));
-                reflectWave(pomocnyBod, wave.getCurrentRadius(), controller, 0);
+                reflectWave(pomocnyBod, wave.getCurrentRadius(), controller, 0,wave.getokamzitaVychylka(), wave.getAmplitude(), wave.getDirection());
             }
             if (currentRadius== (int) wave.getCenter().distance(topLeft)){
                 reflectWave(wave, controller, 0);
@@ -223,7 +225,7 @@ public class WaveManager {
             }
             if (wave.getRadius() == (int)wave.getCenter().distance(topLeft)) {
                 Point pomocnyBod = calculator.calculateSymetricPoint(center, controller.getRoomWalls().get(0));
-                reflectWave(pomocnyBod, wave.getCurrentRadius(), controller, 2);
+                reflectWave(pomocnyBod, wave.getCurrentRadius(), controller, 2,wave.getokamzitaVychylka(), wave.getAmplitude(), wave.getDirection());
             }
             if (currentRadius== (int) wave.getCenter().distance(bottomLeft)){
                 reflectWave(wave, controller, 2);
@@ -237,7 +239,7 @@ public class WaveManager {
             }
             if (wave.getRadius() == (int)wave.getCenter().distance(bottomLeft)) {
                 Point pomocnyBod = calculator.calculateSymetricPoint(center, controller.getRoomWalls().get(2));
-                reflectWave(pomocnyBod, wave.getCurrentRadius(), controller, 1);
+                reflectWave(pomocnyBod, wave.getCurrentRadius(), controller, 1, wave.getokamzitaVychylka(), wave.getAmplitude(), wave.getDirection());
             }
             if (currentRadius== (int) wave.getCenter().distance(bottomRight)){
                 reflectWave(wave, controller, 1);
@@ -284,13 +286,13 @@ public class WaveManager {
         Point center = wave.getCenter();
         Line reflectingWall = controller.getRoomWalls().get(wallIndex);
         Point symmetricPoint = new Calculator().calculateSymetricPoint(center, reflectingWall);
-        createWave(symmetricPoint.getX(), symmetricPoint.getY(), controller, wave.getCurrentRadius());
+        createWave(symmetricPoint.getX(), symmetricPoint.getY(), controller, wave.getCurrentRadius(), wave.getokamzitaVychylka(), wave.getAmplitude(), wave.getDirection());
     }
 
-    private void reflectWave(Point center, int currentRadius, BaseRoomControllerInterface controller, int wallIndex) {
+    private void reflectWave(Point center, int currentRadius, BaseRoomControllerInterface controller, int wallIndex, int okamzitaVychylka, int amplituda, int direction) {
         Line reflectingWall = controller.getRoomWalls().get(wallIndex);
         Point symmetricPoint = new Calculator().calculateSymetricPoint(center, reflectingWall);
-        createWave(symmetricPoint.getX(), symmetricPoint.getY(), controller, currentRadius);
+        createWave(symmetricPoint.getX(), symmetricPoint.getY(), controller, currentRadius, okamzitaVychylka, amplituda, direction);
     }
 
 

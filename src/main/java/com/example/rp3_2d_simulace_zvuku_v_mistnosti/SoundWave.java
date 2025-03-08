@@ -13,11 +13,37 @@ public class SoundWave extends Circle {
     private double x;          // Starting X position
     private double y;          // Starting Y position
     private int currentRadius = 1;   // The current radius of the wave
+    private int amplitude;
+    public int getAmplitude() {
+        return amplitude;
+    }
+    private final int PERIODA = 1;
+    private int okamzitaVychylka;
+
+    // New field to control the direction (1 for normal, -1 for opposite/progressing backwards)
+    private int direction;
+
+    public int getDirection() {
+        return direction;
+    }
+
+    // promene na cas
     private long creationTime; // Timestamp when the wave was created
     private long elapsedPausedTime = 0; // Time we've spent paused
     private long pauseStartTime; // When the wave was paused
     private boolean isPaused = false; // Is the wave currently paused?
 
+
+    // Getter to calculate elapsedTime dynamically
+    public double getElapsedTime() {
+        if (isPaused) {
+            // If paused, return the time until the pause started
+            return (pauseStartTime - creationTime - elapsedPausedTime) / 1000.0; // Convert ms to seconds
+        } else {
+            // If not paused, return total elapsed time
+            return (System.currentTimeMillis() - creationTime - elapsedPausedTime) / 1000.0; // Convert ms to seconds
+        }
+    }
 
 
     private Calculator calculator = new Calculator();
@@ -33,7 +59,7 @@ public class SoundWave extends Circle {
     private Point topRight;
     private Point bottomLeft;
     private Point bottomRight;
-    
+
     private void initializeLines(double x, double y){
         Line vertical = new Line(1,0,-x);
         Line horizontal = new Line(0,1,-y);
@@ -54,68 +80,8 @@ public class SoundWave extends Circle {
 
         return distances;
     }
-    
-    public Point[] getSymetricPoints(){
-        
-        if (isInRectangle(x, y)) {
-            
-            Point[] symetricPoints = new Point[4];
-            symetricPoints[0] = calculator.calculateIntersection(waveLines.get(0), roomWalls.get(0));
-            symetricPoints[1] = calculator.calculateIntersection(waveLines.get(0), roomWalls.get(1));
-            symetricPoints[2] = calculator.calculateIntersection(waveLines.get(1), roomWalls.get(2));
-            symetricPoints[3] = calculator.calculateIntersection(waveLines.get(1), roomWalls.get(3));
-            
-            for (Point point : symetricPoints) {
-                if (point != null) {
-                    System.out.println("Symmetric point coordinates: " + point.toString());
-                }
-            }
-            return symetricPoints;
-            
-        } else if (isAboveRectangle(x, y)) {
 
-            Point[] symetricPoints = new Point[1];
-            symetricPoints[0] = calculator.calculateIntersection(waveLines.get(0), roomWalls.get(1));
 
-            if (symetricPoints[0] != null) {
-                System.out.println("Symmetric point coordinates: " + symetricPoints[0].toString());
-            }
-            return symetricPoints;
-            
-        } else if (isBellowRectangle(x, y)) {
-            
-            Point[] symetricPoints = new Point[1];
-            symetricPoints[0] = calculator.calculateIntersection(waveLines.get(0), roomWalls.get(0));
-
-            if (symetricPoints[0] != null) {
-                System.out.println("Symmetric point coordinates: " + symetricPoints[0].toString());
-            }
-            return symetricPoints;
-
-        } else if (isRightOfRectangle(x, y)) {
-            
-            Point[] symetricPoints = new Point[1];
-            symetricPoints[0] = calculator.calculateIntersection(waveLines.get(1), roomWalls.get(2));
-
-            if (symetricPoints[0] != null) {
-                System.out.println("Symmetric point coordinates: " + symetricPoints[0].toString());
-            }
-            return symetricPoints;
-
-        } else if (isLeftOfRectangle(x, y)) {
-            
-            Point[] symetricPoints = new Point[1];
-            symetricPoints[0] = calculator.calculateIntersection(waveLines.get(1), roomWalls.get(3));
-            if (symetricPoints[0] != null) {
-                System.out.println("Symmetric point coordinates: " + symetricPoints[0].toString());
-            }
-            return symetricPoints;
-            
-        } else {
-            return null;
-        }
-    }
-    
     public int[] getReflectionDistances(){
 
         Point topLeft = controller.getRoomCorners().get(0);
@@ -125,7 +91,7 @@ public class SoundWave extends Circle {
 
         //jestli je to v mistnosti
         if (isInRectangle(x,y) ) {
-            
+
             int[] distances = new int[4];
             distances[0] = (int) center.distance(getIntersectionsWithWalls(x,y)[0]);
             distances[1] = (int) center.distance(getIntersectionsWithWalls(x,y)[1]);
@@ -244,25 +210,57 @@ public class SoundWave extends Circle {
             return null;
         }
     }
-    
-    
+
+    public int getokamzitaVychylka() {
+        // Ensure amplitude is positive
+        amplitude = Math.max(amplitude, 0);
+
+        // Cycle duration (perioda) is fixed to 1 second
+        double cycleDuration = 1.0;
+
+        // Total number of steps (for full cycle)
+        int stepsToAmplitude = amplitude;             // 0 to +amplitude
+        int stepsToNegativeAmplitude = 2 * amplitude; // +amplitude to -amplitude
+        int stepsToZero = amplitude;                  // -amplitude back to 0
+        int totalSteps = stepsToAmplitude + stepsToNegativeAmplitude + stepsToZero;
+
+        // Derive time per step dynamically
+        double timePerStep = cycleDuration / totalSteps;
+
+        // Normalize elapsedTime to the cycle (loop every cycleDuration)
+        double timeInCycle = getElapsedTime() % cycleDuration;
+
+        // Calculate which step we are in based on elapsed time
+        int currentStep = (int) (timeInCycle / timePerStep);
+
+        // Determine which phase of the cycle we're in
+        if (currentStep < stepsToAmplitude) {
+            // Phase 1: 0 to +amplitude
+            return currentStep;
+        } else if (currentStep < stepsToAmplitude + stepsToNegativeAmplitude) {
+            // Phase 2: +amplitude to -amplitude
+            return amplitude - (currentStep - stepsToAmplitude);
+        } else {
+            // Phase 3: -amplitude back to 0
+            return -amplitude + (currentStep - (stepsToAmplitude + stepsToNegativeAmplitude));
+        }
+    }
+
+
     public Point getCenter() {
         return center;
     }
-    
-    public Point[] getIntersections() {
-        return intersections;
-    }
 
-    public List<Line> getWaveLines() {
-        return waveLines;
-    }
-
-    public SoundWave(double x, double y, BaseRoomControllerInterface controller, int radius) {
+    //Initializes the SoundWave object with its position (x, y), assigns the room controller, calculates intersections with walls, and sets its graphical attributes (e.g., stroke color, transparency).
+    public SoundWave(double x, double y, BaseRoomControllerInterface controller, int radius,int okamzitaVychylka, int amplitude, int direction) {
         super(x, y, 0); // Initialize circle with position (x, y) and radius 0
         this.x = x;
         this.y = y;
         this.currentRadius = radius;
+        this.amplitude = amplitude;
+        this.okamzitaVychylka = okamzitaVychylka;
+        this.direction = direction;
+
         //zjistí jaký kontroller používá (V jaké místnosti je)
         this.controller = controller;
         roomWalls = controller.getRoomWalls();
@@ -271,24 +269,22 @@ public class SoundWave extends Circle {
         this.creationTime = System.currentTimeMillis(); // Store creation time
         initializeLines(x,y);
         // Set the stroke (outline) color and make the fill transparent
-        this.setStrokeWidth(5);           // Outline thickness
+        this.setStrokeWidth(1);           // Outline thickness
         this.setFill(Color.TRANSPARENT);  // Transparent inside
-        updateColor(1);
-        this.setMouseTransparent(true);// Optional: Ignore mouse events on the wave
-        
+
+        // Initialize the timeline to track elapsed time
+        //initializeTimeline();
+
+        updateColor(PERIODA);
+        this.setMouseTransparent(true);
+
         topLeft = controller.getRoomCorners().get(0);
         bottomLeft = controller.getRoomCorners().get(1);
         bottomRight = controller.getRoomCorners().get(2);
         topRight = controller.getRoomCorners().get(3);
-        
-        
         //vypocitani pruseciků
         intersections =  getIntersectionsWithWalls(x,y);
-        if (intersections != null) {
-            for (Point intersection : intersections) {
-                //System.out.println(intersection.toString());
-            }
-        }
+
     }
 
     /**
@@ -317,16 +313,6 @@ public class SoundWave extends Circle {
         colorTransition.play();
     }
 
-
-    // Getters for wave properties
-    public double getX() {
-        return x;
-    }
-
-    public double getY() {
-        return y;
-    }
-
     public int getCurrentRadius() {
         return currentRadius;
     }
@@ -345,23 +331,24 @@ public class SoundWave extends Circle {
             isPaused = false;
         }
     }
-    
+
+
     public boolean isInRectangle(double x, double y){
         return x > controller.getXMin() && x < controller.getXMax() && y > controller.getYMin() && y < controller.getYMax();
     }
-    
+
     public boolean isBellowRectangle(double x, double y){
         return x > controller.getXMin() && x < controller.getXMax() && y > controller.getYMax();
     }
-    
+
     public boolean isAboveRectangle(double x, double y){
         return x > controller.getXMin() && x < controller.getXMax() && y < controller.getYMin();
     }
-    
+
     public boolean isLeftOfRectangle(double x, double y){
         return x < controller.getXMin() && y > controller.getYMin() && y < controller.getYMax();
     }
-    
+
     public boolean isRightOfRectangle(double x, double y){
         return x > controller.getXMax() && y > controller.getYMin() && y < controller.getYMax();
     }
