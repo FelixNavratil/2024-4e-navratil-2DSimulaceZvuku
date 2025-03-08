@@ -14,9 +14,35 @@ public class SoundWave extends Circle {
     private double y;          // Starting Y position
     private int currentRadius = 1;   // The current radius of the wave
     private int amplitude;
+
+    // **New field to store the mathematical representation of the circle**
+    private String mathRepresentation;
+
+    // Getter for the field mathRepresentation
+    public String getMathRepresentation() {
+        return mathRepresentation;
+    }
+
+    /**
+     * Calculates the mathematical representation of the sound wave circle in the form:
+     *      (x − a)² + (y − b)² = r²
+     * where (a, b) is the center of the circle and r is the current radius.
+     *
+     * @return The mathematical representation of the circle as a String.
+     */
+    private String calculateMathRepresentation() {
+        double a = this.x;             // X-coordinate of the center
+        double b = this.y;             // Y-coordinate of the center
+        double r = this.currentRadius; // Radius of the circle
+
+        // Format the representation using the circle equation
+        return String.format("(x - %.1f)^2 + (y - %.1f)^2 = %.1f^2", a, b, r);
+    }
+
     public int getAmplitude() {
         return amplitude;
     }
+
     private final int PERIODA = 1;
     private int okamzitaVychylka;
 
@@ -211,39 +237,86 @@ public class SoundWave extends Circle {
         }
     }
 
+    /**
+     * Calculates the instantaneous displacement (okamžitá výchylka) of the sound wave
+     * based on its current phase within the oscillation cycle.
+     * The calculation depends on the amplitude, oscillation direction, and elapsed time.
+     *
+     * @return The instantaneous displacement of the wave. Positive, negative, or zero values indicate
+     *         the wave's position relative to its equilibrium point during its oscillation cycle.
+     *
+     *
+     */
     public int getokamzitaVychylka() {
-        // Ensure amplitude is positive
-        amplitude = Math.max(amplitude, 0);
+        if (direction == 1) {
+            // Ensure amplitude is positive
+            amplitude = Math.max(amplitude, 0);
 
-        // Cycle duration (perioda) is fixed to 1 second
-        double cycleDuration = 1.0;
+            // Cycle duration (perioda) is fixed to 1 second
+            double cycleDuration =  PERIODA;
 
-        // Total number of steps (for full cycle)
-        int stepsToAmplitude = amplitude;             // 0 to +amplitude
-        int stepsToNegativeAmplitude = 2 * amplitude; // +amplitude to -amplitude
-        int stepsToZero = amplitude;                  // -amplitude back to 0
-        int totalSteps = stepsToAmplitude + stepsToNegativeAmplitude + stepsToZero;
+            // Total number of steps (for full cycle)
+            int stepsToAmplitude = amplitude;             // 0 to +amplitude
+            int stepsToNegativeAmplitude = 2 * amplitude; // +amplitude to -amplitude
+            int stepsToZero = amplitude;                  // -amplitude back to 0
+            int totalSteps = stepsToAmplitude + stepsToNegativeAmplitude + stepsToZero;
 
-        // Derive time per step dynamically
-        double timePerStep = cycleDuration / totalSteps;
+            // Derive time per step dynamically
+            double timePerStep = cycleDuration / totalSteps;
 
-        // Normalize elapsedTime to the cycle (loop every cycleDuration)
-        double timeInCycle = getElapsedTime() % cycleDuration;
+            // Normalize elapsedTime to the cycle (loop every cycleDuration)
+            double timeInCycle = getElapsedTime() % cycleDuration;
 
-        // Calculate which step we are in based on elapsed time
-        int currentStep = (int) (timeInCycle / timePerStep);
+            // Calculate which step we are in based on elapsed time
+            int currentStep = (int) (timeInCycle / timePerStep);
 
-        // Determine which phase of the cycle we're in
-        if (currentStep < stepsToAmplitude) {
-            // Phase 1: 0 to +amplitude
-            return currentStep;
-        } else if (currentStep < stepsToAmplitude + stepsToNegativeAmplitude) {
-            // Phase 2: +amplitude to -amplitude
-            return amplitude - (currentStep - stepsToAmplitude);
-        } else {
-            // Phase 3: -amplitude back to 0
-            return -amplitude + (currentStep - (stepsToAmplitude + stepsToNegativeAmplitude));
+            // Determine which phase of the cycle we're in
+            if (currentStep < stepsToAmplitude) {
+                // Phase 1: 0 to +amplitude
+                return currentStep;
+            } else if (currentStep < stepsToAmplitude + stepsToNegativeAmplitude) {
+                // Phase 2: +amplitude to -amplitude
+                return amplitude - (currentStep - stepsToAmplitude);
+            } else {
+                // Phase 3: -amplitude back to 0
+                return -amplitude + (currentStep - (stepsToAmplitude + stepsToNegativeAmplitude));
+            }
+
+        }else{
+            // Ensure amplitude is positive
+            amplitude = Math.max(amplitude, 0);
+
+            // Cycle duration (perioda) is fixed to 1 second
+            double cycleDuration =  PERIODA;
+
+            // Total number of steps (for full cycle)
+            int stepsToAmplitude = amplitude;             // 0 to -amplitude
+            int stepsToPositiveAmplitude = 2 * amplitude; // -amplitude to +amplitude
+            int stepsToZero = amplitude;                  // +amplitude back to 0
+            int totalSteps = stepsToAmplitude + stepsToPositiveAmplitude + stepsToZero;
+
+            // Derive time per step dynamically
+            double timePerStep = cycleDuration / totalSteps;
+
+            // Normalize elapsedTime to the cycle (loop every cycleDuration)
+            double timeInCycle = getElapsedTime() % cycleDuration;
+
+            // Calculate which step we are in based on elapsed time
+            int currentStep = (int) (timeInCycle / timePerStep);
+
+            // Determine which phase of the cycle we're in
+            if (currentStep < stepsToAmplitude) {
+                // Phase 1: 0 to -amplitude
+                return -currentStep;
+            } else if (currentStep < stepsToAmplitude + stepsToPositiveAmplitude) {
+                // Phase 2: -amplitude to +amplitude
+                return -amplitude + (currentStep - stepsToAmplitude);
+            } else {
+                // Phase 3: +amplitude back to 0
+                return amplitude - (currentStep - (stepsToAmplitude + stepsToPositiveAmplitude));
+            }
         }
+
     }
 
 
@@ -251,8 +324,13 @@ public class SoundWave extends Circle {
         return center;
     }
 
-    //Initializes the SoundWave object with its position (x, y), assigns the room controller, calculates intersections with walls, and sets its graphical attributes (e.g., stroke color, transparency).
-    public SoundWave(double x, double y, BaseRoomControllerInterface controller, int radius,int okamzitaVychylka, int amplitude, int direction) {
+
+
+    /**
+     * Constructor initializes the SoundWave object, its position, and relevant fields.
+     * It also generates the mathematical representation of the sound wave circle.
+     */
+    public SoundWave(double x, double y, BaseRoomControllerInterface controller, int radius, int okamzitaVychylka, int amplitude, int direction) {
         super(x, y, 0); // Initialize circle with position (x, y) and radius 0
         this.x = x;
         this.y = y;
@@ -261,39 +339,40 @@ public class SoundWave extends Circle {
         this.okamzitaVychylka = okamzitaVychylka;
         this.direction = direction;
 
-        //zjistí jaký kontroller používá (V jaké místnosti je)
+        // Initialize the room and geometric properties
         this.controller = controller;
         roomWalls = controller.getRoomWalls();
-        //iniccializace stredu
-        center = new Point(x,y);
+        center = new Point(x, y);
         this.creationTime = System.currentTimeMillis(); // Store creation time
-        initializeLines(x,y);
-        // Set the stroke (outline) color and make the fill transparent
-        this.setStrokeWidth(1);           // Outline thickness
-        this.setFill(Color.TRANSPARENT);  // Transparent inside
+        initializeLines(x, y);
 
-        // Initialize the timeline to track elapsed time
-        //initializeTimeline();
+        // Generate the mathematical representation
+        this.mathRepresentation = calculateMathRepresentation();
 
-        updateColor(PERIODA);
+        // Initialize other properties
+        this.setStrokeWidth(1);          // Outline thickness
+        this.setFill(Color.TRANSPARENT); // Transparent fill
         this.setMouseTransparent(true);
 
         topLeft = controller.getRoomCorners().get(0);
         bottomLeft = controller.getRoomCorners().get(1);
         bottomRight = controller.getRoomCorners().get(2);
         topRight = controller.getRoomCorners().get(3);
-        //vypocitani pruseciků
-        intersections =  getIntersectionsWithWalls(x,y);
+        intersections = getIntersectionsWithWalls(x, y);
 
+        updateColor(PERIODA);
     }
 
     /**
      * Grows the wave's radius by a fixed amount (can be dynamic based on time).
      */
     public void grow() {
+
         currentRadius += 1;  // Example growth logic (adjust increment as needed)
         this.setRadius(currentRadius);
-        //updateColor();
+
+        // Update the mathematical representation when the wave grows
+        this.mathRepresentation = calculateMathRepresentation();
     }
 
     private void updateColor(double perioda){
@@ -386,4 +465,23 @@ public class SoundWave extends Circle {
         }
         return effectiveAge > maxAge;
     }
+
+    /**
+     * Returns a mathematical representation of the sound wave circle in the form:
+     *      (x − a)² + (y − b)² = r²
+     * where (a, b) is the center of the circle and r is the current radius.
+     * This represents the circle as a set of all points that satisfy the equation.
+     *
+     * @return A String representing the mathematical representation of the circle.
+     */
+    public String mathematicalRepresentation() {
+        // Circle center coordinates
+        double a = this.getCenterX(); // X-coordinate of the center
+        double b = this.getCenterY(); // Y-coordinate of the center
+        double r = this.getRadius();  // Current radius of the sound wave
+
+        // Format the mathematical representation
+        return String.format("(x - %.1f)^2 + (y - %.1f)^2 = %.1f^2", a, b, r);
+    }
+
 }

@@ -57,6 +57,12 @@ public class WaveManager {
                 if (centerPane != null) {
                     centerPane.getChildren().remove(wave);
                 }
+            }else if(wave.getAmplitude() <=0 ){
+                wavesToRemove.add(wave);
+                if (centerPane != null) {
+                    centerPane.getChildren().remove(wave);
+                }
+
             }
         }
         //checkWavesForCorners(controller);
@@ -64,36 +70,29 @@ public class WaveManager {
         activeWaves.removeAll(wavesToRemove);
     }
 
-/*
-    //Checks if waves have reached any corner of the room and generates new waves if so (to simulate corner reflections).
-    public void checkWavesForCorners(BaseRoomControllerInterface controller) {
-        // Iterate over a copy of the activeWaves to avoid modification issues
+    /**
+     * Checks and adjusts the wave's immediate displacement (okamzitaVychylka)
+     * based on the given amplitude. If the displacement exceeds the amplitude,
+     * it is constrained to the amplitude's bounds.
+     *
+     * @param amplitude The maximum allowable displacement for the wave.
+     * @param okamzitaVychylka The current immediate displacement of the wave.
+     * @return The adjusted immediate displacement if it exceeds bounds; otherwise, the original displacement.
+     */
+    private int checkWavesForAmplitude(int amplitude, int okamzitaVychylka){
 
-        for (SoundWave wave : new ArrayList<>(activeWaves)) {
-            // Get distances to all four corners
-            int[] cornerDistances = wave.getCornerDistances();
-            int currentRadius = wave.getCurrentRadius();
-
-            // Check if the wave has reached any corner
-            if (currentRadius == cornerDistances[0]) { // Top-Left Corner
-
-                createWave(controller.getXMin(), controller.getYMin(), controller, 0); // Create new wave
+        if (amplitude <= okamzitaVychylka || -amplitude >= okamzitaVychylka){
+            if (okamzitaVychylka>0){
+                okamzitaVychylka=amplitude;
+            } else if (okamzitaVychylka < 0) {
+                okamzitaVychylka = -amplitude;
             }
-            if (currentRadius == cornerDistances[1]) { // Bottom-Left Corner
-
-                createWave(controller.getXMin(), controller.getYMax(), controller,0); // Create new wave
-            }
-            if (currentRadius == cornerDistances[2]) { // Bottom-Right Corner
-
-                createWave(controller.getXMax(), controller.getYMax(), controller,0); // Create new wave
-            }
-            if (currentRadius == cornerDistances[3]) { // Top-Right Corner
-
-                createWave(controller.getXMax(), controller.getYMin(), controller,0); // Create new wave
-            }
+            return okamzitaVychylka;
+        }else{
+            return okamzitaVychylka;
         }
+
     }
-*/
 
     //Handles wave reflections when they hit the walls of the room.
     public void checkWavesForReflections(BaseRoomControllerInterface controller) {
@@ -115,7 +114,8 @@ public class WaveManager {
                     if (currentRadius == reflectionDistances[i]) {
                         Line reflectingWall = controller.getRoomWalls().get(i);
                         Point symmetricPoint = new Calculator().calculateSymetricPoint(center, reflectingWall);
-                        createWave(symmetricPoint.getX(), symmetricPoint.getY(), controller, wave.getCurrentRadius(), wave.getokamzitaVychylka(), wave.getAmplitude(),  wave.getDirection());
+                        int okamzitaVychylka = checkWavesForAmplitude(wave.getAmplitude(), wave.getokamzitaVychylka());
+                        createWave(symmetricPoint.getX(), symmetricPoint.getY(), controller, wave.getCurrentRadius(), okamzitaVychylka, wave.getAmplitude()-20,  -1*wave.getDirection());
                         break;
                     }
                 }
@@ -136,47 +136,40 @@ public class WaveManager {
         if (wave.isAboveRectangle(center.getX(), center.getY())) {
 
             if (currentRadius == (int) wave.getCenter().distance(controller.getRoomCorners().get(0))){
-                System.out.println("odrazeno horni");
                 reflectWave(wave, controller, 2);
             }
 
             if (wave.getRadius() ==(int) wave.getCenter().distance(controller.getRoomCorners().get(3))) {
-                System.out.println("odrazeno horni1 -------");
                 reflectWave(wave, controller, 3);
             }
 
         } else if (wave.isBellowRectangle(center.getX(), center.getY())) {
 
             if (currentRadius== (int) wave.getCenter().distance(controller.getRoomCorners().get(1))){
-                //System.out.println("odrazeno spodni");
                 reflectWave(wave, controller, 2);
             }
 
             if (wave.getRadius() ==(int) wave.getCenter().distance(controller.getRoomCorners().get(2))) {
-                //System.out.println("odrazeno spodni1 -------");
                 reflectWave(wave, controller, 3);
             }
 
         } else if (wave.isLeftOfRectangle(center.getX(), center.getY())) {
 
             if (currentRadius== (int) wave.getCenter().distance(controller.getRoomCorners().get(1))){
-                //System.out.println("odrazeno leva");
                 reflectWave(wave, controller, 1);
             }
             if (wave.getRadius() == (int)wave.getCenter().distance(controller.getRoomCorners().get(0))) {
-                //System.out.println("odrazeno leva1 ------");
                 reflectWave(wave, controller, 0);
             }
 
         } else if (wave.isRightOfRectangle(center.getX(), center.getY())) {
-            System.out.println("current radius = " + currentRadius + "  distance =" + (int) wave.getCenter().distance(controller.getRoomCorners().get(3)));
 
             if (currentRadius== (int) wave.getCenter().distance(controller.getRoomCorners().get(2))){
-                //System.out.println("odrazeno zprava dole");
+
                 reflectWave(wave, controller, 1);
             }
             if (wave.getRadius() == (int)wave.getCenter().distance(controller.getRoomCorners().get(3))) {
-                //System.out.println("odrazeno zprava nahore");
+
                 reflectWave(wave, controller, 0);
             }
         }
@@ -286,13 +279,19 @@ public class WaveManager {
         Point center = wave.getCenter();
         Line reflectingWall = controller.getRoomWalls().get(wallIndex);
         Point symmetricPoint = new Calculator().calculateSymetricPoint(center, reflectingWall);
-        createWave(symmetricPoint.getX(), symmetricPoint.getY(), controller, wave.getCurrentRadius(), wave.getokamzitaVychylka(), wave.getAmplitude(), wave.getDirection());
+        int okamzitaVychylka = checkWavesForAmplitude(wave.getAmplitude(), wave.getokamzitaVychylka());
+        if (wave.getAmplitude()-20 >0){
+            createWave(symmetricPoint.getX(), symmetricPoint.getY(), controller, wave.getCurrentRadius(), okamzitaVychylka, wave.getAmplitude()-20, -1*wave.getDirection());
+        }
     }
 
     private void reflectWave(Point center, int currentRadius, BaseRoomControllerInterface controller, int wallIndex, int okamzitaVychylka, int amplituda, int direction) {
         Line reflectingWall = controller.getRoomWalls().get(wallIndex);
         Point symmetricPoint = new Calculator().calculateSymetricPoint(center, reflectingWall);
-        createWave(symmetricPoint.getX(), symmetricPoint.getY(), controller, currentRadius, okamzitaVychylka, amplituda, direction);
+        int novaOkamzitaVychylka = checkWavesForAmplitude(amplituda, okamzitaVychylka);
+        if (amplituda-20 >0){
+            createWave(symmetricPoint.getX(), symmetricPoint.getY(), controller, currentRadius, novaOkamzitaVychylka, amplituda-20, -1*direction);
+        }
     }
 
 
@@ -304,7 +303,6 @@ public class WaveManager {
         for (SoundWave wave : activeWaves) {
             wave.resume();
         }
-        //System.out.println("Wave propagation started.");
     }
 
     public void pauseWaves() {
@@ -312,12 +310,11 @@ public class WaveManager {
         for (SoundWave wave : activeWaves) {
             wave.pause();
         }
-        //System.out.println("Wave propagation stopped.");
     }
 
     public void resetWaves() {
         activeWaves.clear();
-        //System.out.println("All waves have been reset.");
+
     }
 
     public boolean isRunning() {

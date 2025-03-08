@@ -10,6 +10,26 @@ public class WaveFactory {
      */
     public SoundWave createWave(double x, double y, BaseRoomControllerInterface controller, int radius,int okamzitaVychylka, int amplitude, int direction) {
         // Instantiate a new SoundWave object with the provided parameters
+
+
+
+        if (okamzitaVychylka > 0) {
+            if (amplitude <= okamzitaVychylka) {
+                okamzitaVychylka = amplitude;
+            }
+        }else if (okamzitaVychylka < 0){
+            if (-amplitude >= okamzitaVychylka) {
+                okamzitaVychylka = -amplitude;
+            }
+        }
+/*
+        // Print the okamzita vychylka, amplitude, radius, and direction
+        System.out.println("okamzitaVychylka: " + okamzitaVychylka);
+        System.out.println("amplitude: " + amplitude);
+        System.out.println("radius: " + radius);
+        System.out.println("direction: " + direction);
+        System.out.println("---------------");
+*/
         return new SoundWave(x, y, controller, radius, okamzitaVychylka, amplitude, direction);
     }
 
