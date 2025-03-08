@@ -18,5 +18,6 @@ public interface BaseRoomControllerInterface {
     private void initializeLines(double xMin, double xMax, double yMin, double yMax){}
     public List<Line> getRoomWalls();
     List<Point> getRoomCorners();
+    public void setSoundWaveVisualiser(double width, double height);
 
 }

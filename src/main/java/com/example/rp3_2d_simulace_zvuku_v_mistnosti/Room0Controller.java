@@ -148,6 +148,10 @@ public class Room0Controller implements BaseRoomControllerInterface {
             System.out.println("Fullscreen mode is enabled. Dimensions managed by JavaFX.");
         }
     }
+
+    public void setSoundWaveVisualiser(double width, double height){
+        SoundWaveVisualiser soundWaveVisualiser = new SoundWaveVisualiser((int)width, (int) height, this);
+    }
     
     
 

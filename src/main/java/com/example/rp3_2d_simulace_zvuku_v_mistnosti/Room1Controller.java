@@ -199,6 +199,10 @@ public class Room1Controller implements BaseRoomControllerInterface {
         roomWalls = List.of(top, bottom, left, right);
     }
 
+    public void setSoundWaveVisualiser(double width, double height){
+        SoundWaveVisualiser soundWaveVisualiser = new SoundWaveVisualiser((int)width, (int) height, this);
+    }
+
     // Dynamically update button sizes based on `room1Height` and `room1Width`
     public void updateLayout() {
         System.out.println("update layout");

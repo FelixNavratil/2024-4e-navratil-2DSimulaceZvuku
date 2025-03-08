@@ -25,6 +25,28 @@ public class Circle {
         this.radius = radius;
     }
 
+    /**
+     * Determines if a point (x, y) lies exactly on the circle.
+     *
+     * This uses the circle equation: (x - centerX)² + (y - centerY)² = radius².
+     * To handle floating-point rounding errors, we use a small tolerance.
+     *
+     * @param x The x-coordinate of the point.
+     * @param y The y-coordinate of the point.
+     * @return True if the point lies on the circle, false otherwise.
+     */
+    public boolean isPointOnCircle(double x, double y) {
+        // Calculate the squared distance from the point to the center
+        double distanceSquared = Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2);
+        double radiusSquared = Math.pow(radius, 2); // Square of the radius
+
+        // Allow for small numerical errors with a tolerance
+        double tolerance = 0.0001;
+
+        // Check if the distance is approximately equal to the radius
+        return Math.abs(distanceSquared - radiusSquared) <= tolerance;
+    }
+
     // Getters and setters for x, y, and radius
     public double getCenterX() {
         return centerX;

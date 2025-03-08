@@ -73,7 +73,7 @@ public class SoundWave extends Circle {
 
 
     private Calculator calculator = new Calculator();
-    private BaseRoomControllerInterface controller = new Room0Controller();
+    private BaseRoomControllerInterface controller;
 
 
 
