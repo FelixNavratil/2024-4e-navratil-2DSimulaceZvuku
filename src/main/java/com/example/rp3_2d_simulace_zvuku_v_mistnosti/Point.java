@@ -3,11 +3,30 @@ package com.example.rp3_2d_simulace_zvuku_v_mistnosti;
 public class Point {
     private double x;
     private double y;
+    private int okamzitaVychylka;
     private Calculator calculator = new Calculator();
 
     public Point(double x, double y) {
         setX(x);
         setY(y);
+    }
+
+    public Point(double[] coords){
+        setX(coords[0]);
+        setY(coords[1]);
+    }
+
+    public Point(int x, int y){
+        setX(x);
+        setY(y);
+    }
+
+    public void setOkamzitaVychylka(int okamzitaVychylka) {
+        this.okamzitaVychylka = okamzitaVychylka;
+    }
+
+    public int getOkamzitaVychylka() {
+        return okamzitaVychylka;
     }
 
     public Point(Line line1, Line line2){

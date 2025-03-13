@@ -31,7 +31,7 @@ public class Pixel extends Rectangle{
         rectangle.setY(realY);       // Set the Y position of the rectangle
         rectangle.setWidth(PIXELSIZE);     // Set the rectangle width (1 pixel)
         rectangle.setHeight(PIXELSIZE);    // Set the rectangle height (1 pixel)
-        setColor(celkovaVychylka);
+        setDefault();
 
     }
 
@@ -74,7 +74,7 @@ public class Pixel extends Rectangle{
     }
 
     public void setDefault(){
-        celkovaVychylka = 10;
+        celkovaVychylka = 0;
         setColor(celkovaVychylka);
     }
 
@@ -85,6 +85,11 @@ public class Pixel extends Rectangle{
                 ", realX=" + realX +
                 ", realY=" + realY +
                 '}';
+    }
+
+    public void addVychylka(int vychylka){
+        celkovaVychylka += vychylka;
+        setColor(celkovaVychylka);
     }
 
 

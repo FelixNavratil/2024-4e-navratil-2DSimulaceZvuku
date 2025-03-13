@@ -5,8 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * TODO momentalne se pixely vepisuji i na okraj obdelnika a to nechci
- * sjistit jake souradnice ma soundwave
+ * TODO
  */
 public class PixelManager {
 

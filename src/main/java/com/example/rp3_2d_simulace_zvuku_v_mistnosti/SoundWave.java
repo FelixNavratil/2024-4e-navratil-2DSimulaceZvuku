@@ -7,13 +7,20 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.util.Duration;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+
+/**
+ * TODO udelej hledani bodu vice efektivni
+ */
 public class SoundWave extends Circle {
     private double x;          // Starting X position
     private double y;          // Starting Y position
     private int currentRadius = 1;   // The current radius of the wave
     private int amplitude;
+    Map<Point, Integer> pointMap = new HashMap<>();
 
     // **New field to store the mathematical representation of the circle**
     private String mathRepresentation;
@@ -323,6 +330,10 @@ public class SoundWave extends Circle {
 
 
 
+
+
+
+
     /**
      * Constructor initializes the SoundWave object, its position, and relevant fields.
      * It also generates the mathematical representation of the sound wave circle.
@@ -370,6 +381,8 @@ public class SoundWave extends Circle {
 
         // Update the mathematical representation when the wave grows
         this.mathRepresentation = calculateMathRepresentation();
+
+        listPointsInCircleOptimizedFilteredEarly();
     }
 
     private void updateColor(double perioda){
@@ -410,6 +423,10 @@ public class SoundWave extends Circle {
 
 
     public boolean isInRectangle(double x, double y){
+        return x > controller.getXMin() && x < controller.getXMax() && y > controller.getYMin() && y < controller.getYMax();
+    }
+
+    public boolean isInRectangle(int x, int y){
         return x > controller.getXMin() && x < controller.getXMax() && y > controller.getYMin() && y < controller.getYMax();
     }
 
@@ -480,5 +497,93 @@ public class SoundWave extends Circle {
         // Format the mathematical representation
         return String.format("(x - %.1f)^2 + (y - %.1f)^2 = %.1f^2", a, b, r);
     }
+
+
+    public void listPointsInCircleOptimizedFilteredEarly() {
+        double a = this.x;                  // Circle center X-coordinate
+        double b = this.y;                  // Circle center Y-coordinate
+        int r = this.currentRadius;         // Radius of the circle
+        int okamzitaVychylkaValue = getokamzitaVychylka();
+
+        // Midpoint Circle Algorithm
+        int x = 0;
+        int y = r;
+        int d = 1 - r; // Decision variable
+
+        // Add only points that may fall in the rectangle
+        addCirclePointsFilteredEarly(x, y, a, b, okamzitaVychylkaValue);
+
+        while (x <= y) {
+            if (d < 0) {
+                d = d + 2 * x + 3; // Move horizontally
+            } else {
+                d = d + 2 * (x - y) + 5; // Move diagonally
+                y--;
+            }
+            x++;
+
+            // Add only points that may be in the rectangle
+            addCirclePointsFilteredEarly(x, y, a, b, okamzitaVychylkaValue);
+        }
+
+        // Confirm total points added
+        //System.out.println("Total points added (early filtered): " + pointMap.size());
+    }
+
+    /**
+     * Adds only points that are within the rectangle after basic symmetry checks.
+     */
+    private void addCirclePointsFilteredEarly(int x, int y, double a, double b, int okamzitaVychylkaValue) {
+        // Early filtering: Check if at least one symmetric point is in the rectangle
+        if (isAnySymmetricPointInRectangle(x, y, a, b)) {
+            // Add only valid symmetric points
+            addPointToMapIfInRectangle((int) (a + x), (int) (b + y), okamzitaVychylkaValue); // Quadrant 1
+            addPointToMapIfInRectangle((int) (a - x), (int) (b + y), okamzitaVychylkaValue); // Quadrant 2
+            addPointToMapIfInRectangle((int) (a + x), (int) (b - y), okamzitaVychylkaValue); // Quadrant 4
+            addPointToMapIfInRectangle((int) (a - x), (int) (b - y), okamzitaVychylkaValue); // Quadrant 3
+            addPointToMapIfInRectangle((int) (a + y), (int) (b + x), okamzitaVychylkaValue); // Transposed 1
+            addPointToMapIfInRectangle((int) (a - y), (int) (b + x), okamzitaVychylkaValue); // Transposed 2
+            addPointToMapIfInRectangle((int) (a + y), (int) (b - x), okamzitaVychylkaValue); // Transposed 3
+            addPointToMapIfInRectangle((int) (a - y), (int) (b - x), okamzitaVychylkaValue); // Transposed 4
+        }
+    }
+
+    /**
+     * Adds a point to the map if it lies within the allowed rectangle.
+     *
+     * @param x                     The x-coordinate of the point.
+     * @param y                     The y-coordinate of the point.
+     * @param okamzitaVychylkaValue The value to associate with the point in the map.
+     */
+    private void addPointToMapIfInRectangle(int x, int y, int okamzitaVychylkaValue) {
+        // Check if the point is within the specified rectangle
+        if (isInRectangle(x, y)) {
+            // If the point is inside the rectangle, add it to the map
+            Point point = new Point(x, y);
+            if (!pointMap.containsKey(point)) { // Avoid adding duplicate points
+                pointMap.put(point, okamzitaVychylkaValue);
+
+                // Optional: Print for debugging purposes
+                //System.out.println("Point (" + x + ", " + y + ") added with okamzitaVychylka = " + okamzitaVychylkaValue);
+            }
+        }
+    }
+
+    /**
+     * Checks if any of the 8 symmetric points for (x, y) are inside the rectangle.
+     */
+    private boolean isAnySymmetricPointInRectangle(int x, int y, double a, double b) {
+        return isInRectangle((int) (a + x), (int) (b + y)) ||
+                isInRectangle((int) (a - x), (int) (b + y)) ||
+                isInRectangle((int) (a + x), (int) (b - y)) ||
+                isInRectangle((int) (a - x), (int) (b - y)) ||
+                isInRectangle((int) (a + y), (int) (b + x)) ||
+                isInRectangle((int) (a - y), (int) (b + x)) ||
+                isInRectangle((int) (a + y), (int) (b - x)) ||
+                isInRectangle((int) (a - y), (int) (b - x));
+    }
+
+
+
 
 }
