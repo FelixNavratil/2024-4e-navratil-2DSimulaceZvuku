@@ -88,6 +88,7 @@ public class Room1Controller implements BaseRoomControllerInterface {
     private WaveFactory waveFactory = new WaveFactory();
     private WaveManager waveManager = new WaveManager(waveFactory, centerPane);
     private Timeline waveTimeline;
+    PixelManager pixelManager;
 
     public void setSceneDimensions(Scene scene, int height, int width) {
         stage.setScene(scene);
@@ -128,7 +129,8 @@ public class Room1Controller implements BaseRoomControllerInterface {
         centerPane.setPrefHeight(room1Height);
         centerPane.setPrefWidth(room1Width);
 
-
+        // Initialize the PixelManager with this Room0Controller
+        pixelManager = new PixelManager(this);
     }
 
     private void createTimeline() {
@@ -156,8 +158,12 @@ public class Room1Controller implements BaseRoomControllerInterface {
 
             initializeLines(xMin, xMax, yMin, yMax);
 
-            // Print the boundaries after initializing the rectangle
+            // Initialize the Pixel Grid with the rectangle's dimensions and position
+            pixelManager.initializePixelGrid((int) rectangle.getWidth(), (int) rectangle.getHeight(), rectangle.getX(), rectangle.getY());
 
+            // Add all pixels to the pane
+            pixelManager.addRectanglesToPane( centerPane);
+            System.out.println("pixels added");
 
             createOverlay();
 
@@ -199,9 +205,7 @@ public class Room1Controller implements BaseRoomControllerInterface {
         roomWalls = List.of(top, bottom, left, right);
     }
 
-    public void setSoundWaveVisualiser(double width, double height){
-        SoundWaveVisualiser soundWaveVisualiser = new SoundWaveVisualiser((int)width, (int) height, this);
-    }
+
 
     // Dynamically update button sizes based on `room1Height` and `room1Width`
     public void updateLayout() {

@@ -147,10 +147,10 @@ public class SoundWave extends Circle {
             //napravo od prave primky ale mezi horni a spodni primkou
         } else if ( isRightOfRectangle(x,y)) {
             int[] distances = new int[1];
-           distances[0] = (int) center.distance(getIntersectionsWithWalls(x,y)[0]);
-           return distances;
+            distances[0] = (int) center.distance(getIntersectionsWithWalls(x,y)[0]);
+            return distances;
 
-           //napravo nahore
+            //napravo nahore
         } else if (isAboveOnTheRightOfRectangle(x,y)){
             int[] distances = new int[3];
             distances[0] = (int) center.distance(topLeft);
@@ -194,9 +194,6 @@ public class SoundWave extends Circle {
 
     //ziskani pruseciku
     private Point[] getIntersectionsWithWalls(double x, double y){
-
-
-
 
         //jestli souradnice stredu jsou v mistnosti
         if (isInRectangle(x,y)) {

@@ -12,12 +12,14 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
+import java.awt.*;
 import java.io.IOException;
 import java.util.List;
 
@@ -110,11 +112,12 @@ public class Room0Controller implements BaseRoomControllerInterface {
     // vytvoreni promennych na cas
     private Timeline timer;
     private int millisecondsElapsed  = 0;  // Track elapsed seconds
-//--------------------------------------------------------------------------------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------------------------------------------------------------------------------------
     // inicializace waveManazera a waveFactory
     private WaveFactory waveFactory = new WaveFactory();
     private WaveManager waveManager = new WaveManager(waveFactory, centerPane);
     private Timeline waveTimeline;
+    PixelManager pixelManager;
 
     public void setSceneDimensions(Scene scene, int height, int width) {
 
@@ -149,11 +152,9 @@ public class Room0Controller implements BaseRoomControllerInterface {
         }
     }
 
-    public void setSoundWaveVisualiser(double width, double height){
-        SoundWaveVisualiser soundWaveVisualiser = new SoundWaveVisualiser((int)width, (int) height, this);
-    }
-    
-    
+
+
+
 
     /** inicializace timeru, tlacitek a obdelnika */
     @FXML
@@ -173,6 +174,9 @@ public class Room0Controller implements BaseRoomControllerInterface {
         centerPane.setPrefHeight(room0Height);
         centerPane.setPrefWidth(room0Width);
 
+        // Initialize the PixelManager with this Room0Controller
+        pixelManager = new PixelManager(this);
+
         System.out.println("-----------inicializace skoncila-------------");
     }
 
@@ -182,15 +186,26 @@ public class Room0Controller implements BaseRoomControllerInterface {
             rectangle.setHeight(rectangleSize);
             rectangle.setX(x- rectangleSize / 2);
             rectangle.setY(y- rectangleSize);
-            
+            rectangle.setStroke(Color.BLACK);
+            rectangle.setStrokeWidth(5);
 
-            
+
             xMin = rectangle.getX();
             xMax = rectangle.getX() + rectangle.getWidth();
             yMin = rectangle.getY();
             yMax = rectangle.getY() + rectangle.getHeight();
-            
+
             initializeLines(xMin, xMax, yMin, yMax);
+
+            // Initialize the Pixel Grid with the rectangle's dimensions and position
+            pixelManager.initializePixelGrid((int) rectangle.getWidth(), (int) rectangle.getHeight(), rectangle.getX(), rectangle.getY());
+
+            // Add all pixels to the pane
+            pixelManager.addRectanglesToPane( centerPane);
+            System.out.println("pixels added");
+
+            System.out.println("Room Width: " + rectangle.getWidth());
+            System.out.println("Room Height: " + rectangle.getHeight());
 
             createOverlay();
 
@@ -207,7 +222,7 @@ public class Room0Controller implements BaseRoomControllerInterface {
     public double getRectangleHeight() {
         return rectangle != null ? rectangle.getHeight() : 0;
     }
-    
+
     public int getXMin() {
         return (int) xMin;
     }
@@ -249,7 +264,7 @@ public class Room0Controller implements BaseRoomControllerInterface {
         leftRectangle.setFill(javafx.scene.paint.Color.WHITE);
         rightRectangle.setFill(javafx.scene.paint.Color.WHITE);
 
-       centerPane.getChildren().addAll(topRectangle,bottomRectangle,leftRectangle,rightRectangle);
+        centerPane.getChildren().addAll(topRectangle,bottomRectangle,leftRectangle,rightRectangle);
     }
 
     public void overlayRectangles(){
@@ -259,7 +274,7 @@ public class Room0Controller implements BaseRoomControllerInterface {
         rightRectangle.toFront();
     }
 
- //--------------------------------------------------------------------------------------------------------------------------------------------------------
+    //--------------------------------------------------------------------------------------------------------------------------------------------------------
 
     //nastaveni velikosti jednotlivych tlacitek
     public void updateLayout() {
@@ -289,7 +304,7 @@ public class Room0Controller implements BaseRoomControllerInterface {
         Line bottom = new Line(0, 1, -yMax);
         Line left = new Line(1, 0, -xMin);
         Line right = new Line(1, 0, -xMax);
-        
+
         Point topRight = new Point(top, right);
         Point topLeft = new Point(top, left);
         Point bottomLeft = new Point(bottom, left);
@@ -399,7 +414,7 @@ public class Room0Controller implements BaseRoomControllerInterface {
         // Update the label text with milliseconds precision
         bottomText.setText(String.format("%02d:%02d:%02d.%03d", hours, minutes, seconds, milliseconds));
     }
-    
+
 
     // reseni kliknuti na obdelnik
     @FXML
