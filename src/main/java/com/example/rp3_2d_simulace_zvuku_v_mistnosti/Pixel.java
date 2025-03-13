@@ -8,14 +8,14 @@ import java.awt.*;
  * The Pixel class represents an individual pixel in a 2D grid with a specific position
  * and the ability to be lit with a specified color.
  */
-public class Pixel {
+public class Pixel extends Rectangle{
     private int gridX;       // The x-coordinate in the grid
     private int gridY;       // The y-coordinate in the grid
     private double realX;    // The real-world x-coordinate on the scene
     private double realY;    // The real-world y-coordinate on the scene
     private int celkovaVychylka;
     private Rectangle rectangle;   // The visual representation of the pixel as a rectangle
-    private final double PIXELSIZE = 3;
+    private static final double PIXELSIZE = 2;
 
     // Constructor for the pixel
     public Pixel(int gridX, int gridY, double realX, double realY) {
@@ -23,14 +23,14 @@ public class Pixel {
         this.gridY = gridY;
         this.realX = realX;
         this.realY = realY;
-        this.celkovaVychylka = 50;
+        celkovaVychylka = 50;
 
         // Initialize the rectangle to represent this pixel, with default properties
-        this.rectangle = new Rectangle();
-        this.rectangle.setX(realX);       // Set the X position of the rectangle
-        this.rectangle.setY(realY);       // Set the Y position of the rectangle
-        this.rectangle.setWidth(PIXELSIZE);     // Set the rectangle width (1 pixel)
-        this.rectangle.setHeight(PIXELSIZE);    // Set the rectangle height (1 pixel)
+        rectangle = new Rectangle();
+        rectangle.setX(realX);       // Set the X position of the rectangle
+        rectangle.setY(realY);       // Set the Y position of the rectangle
+        rectangle.setWidth(PIXELSIZE);     // Set the rectangle width (1 pixel)
+        rectangle.setHeight(PIXELSIZE);    // Set the rectangle height (1 pixel)
         setColor(celkovaVychylka);
 
     }
@@ -73,6 +73,11 @@ public class Pixel {
 
     }
 
+    public void setDefault(){
+        celkovaVychylka = 10;
+        setColor(celkovaVychylka);
+    }
+
 
     @Override
     public String toString() {
@@ -85,8 +90,6 @@ public class Pixel {
 
 
     private Color createColor(int celkovaVychylka) {
-
-        System.out.println("celkovaVychylka: " + celkovaVychylka + "");
 
         if (celkovaVychylka >= 90 && celkovaVychylka <= 100) {
             // Assign color for interval 90 <= CV <= 100

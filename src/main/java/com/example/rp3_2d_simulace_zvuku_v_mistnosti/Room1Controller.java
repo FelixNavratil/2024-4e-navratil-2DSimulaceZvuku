@@ -43,6 +43,7 @@ public class Room1Controller implements BaseRoomControllerInterface {
     private double yMax;
     private List<Line> roomWalls;
     private List<Point> roomCorners;
+    private int strokeWidth = 4;
 
     public List<Line> getRoomWalls() {
         return roomWalls;
@@ -141,6 +142,10 @@ public class Room1Controller implements BaseRoomControllerInterface {
         timer.setCycleCount(Timeline.INDEFINITE);
     }
 
+    public int getStroke(){
+        return (int)rectangle.getStrokeWidth();
+    }
+
     public void initializeRectangle(double x, double y) {
         if (rectangle != null) {
 
@@ -148,7 +153,8 @@ public class Room1Controller implements BaseRoomControllerInterface {
             rectangle.setHeight(rectangleHeight);
             rectangle.setX(x- rectangleWidth / 2);
             rectangle.setY(y- rectangleWidth);
-
+            rectangle.setStroke(Color.BLACK);
+            rectangle.setStrokeWidth(strokeWidth);
 
 
             xMin = rectangle.getX();
@@ -325,14 +331,9 @@ public class Room1Controller implements BaseRoomControllerInterface {
         // Reset the WaveManager
         waveManager.resetWaves(); // Clear all active waves
 
-        // Remove all children from centerPane except the original rectangles
-        centerPane.getChildren().removeIf(node ->
-                node != rectangle &&
-                        node != topRectangle &&
-                        node != bottomRectangle &&
-                        node != leftRectangle &&
-                        node != rightRectangle
-        );
+        if (pixelManager != null) {
+            pixelManager.resetPixelGridDisplacement();  // Reset all pixel displacements to 0
+        }
     }
 
     @FXML

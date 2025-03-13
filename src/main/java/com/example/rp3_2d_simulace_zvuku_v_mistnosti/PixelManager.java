@@ -1,7 +1,6 @@
 package com.example.rp3_2d_simulace_zvuku_v_mistnosti;
 
 import javafx.scene.layout.Pane;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,40 +14,56 @@ public class PixelManager {
     private int width;  // Width of the room
     private int height; // Height of the room
     private Map<String, Double> pixelDisplacements = new HashMap<>();
+    private BaseRoomControllerInterface roomController;
+    private static final double PIXELSIZE = 2;
 
     public PixelManager(BaseRoomControllerInterface roomController) {
-        // Empty constructor; initialization happens in initializePixelGrid
+        this.roomController = roomController;
     }
 
     /**
      * Initializes the 2D array of Pixels based on the rectangle's width, height, and its position in the scene.
      *
-     * @param width     Width of the rectangle (number of columns in the grid).
-     * @param height    Height of the rectangle (number of rows in the grid).
+     * @param rectWidth     Width of the rectangle (number of columns in the grid).
+     * @param rectHeight    Height of the rectangle (number of rows in the grid).
      * @param rectX     The starting X-coordinate of the rectangle in the scene.
      * @param rectY     The starting Y-coordinate of the rectangle in the scene.
      */
-    public void initializePixelGrid(int width, int height, double rectX, double rectY) {
-        this.width = width;
-        this.height = height;
+    public void initializePixelGrid(int rectWidth, int rectHeight, double rectX, double rectY) {
+        // Get the stroke width from the controller
+        double strokeWidth = roomController.getStroke();
 
-        // Create a 2D array matching the dimensions
+        // Usable area inside the rectangle (excluding the stroke on all sides)
+        double innerWidth = rectWidth -  strokeWidth;
+        double innerHeight = rectHeight -  strokeWidth;
+
+        // Calculate number of pixels that fit inside the usable area
+        this.width = (int) Math.floor(innerWidth / PIXELSIZE);
+        this.height = (int) Math.floor(innerHeight / PIXELSIZE);
+
+        // Create the 2D pixel grid
         pixelGrid = new Pixel[width][height];
 
-        // Initialize each pixel with its real-world scene coordinates
+        // Offset the starting position to account for the stroke
+        double startX = rectX + strokeWidth/2 + (innerWidth % PIXELSIZE) / 2; // Center-align pixels horizontally
+        double startY = rectY + strokeWidth/2 + (innerHeight % PIXELSIZE) / 2; // Center-align pixels vertically
+
+        // Initialize the pixel grid
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
-                // Calculate the real X and Y on the scene
-                double realX = rectX + x; // Add the x-offset of the rectangle
-                double realY = rectY + y; // Add the y-offset of the rectangle
+                // Calculate real-world (scene) coordinates for each pixel
+                double realX = startX + x * PIXELSIZE;
+                double realY = startY + y * PIXELSIZE;
 
-                pixelGrid[x][y] = new Pixel(x, y, realX, realY); // Add real coordinates
+                // Create a new pixel and add it to the grid
+                pixelGrid[x][y] = new Pixel(x, y, realX, realY);
             }
         }
 
-        // Debugging: Print the width and height of the grid
-        System.out.println("Width: " + pixelGrid.length);
-        System.out.println("Height: " + (pixelGrid.length > 0 ? pixelGrid[0].length : 0));
+        // Debugging: Log the grid dimensions and starting positions
+        System.out.println("Pixel Grid Width: " + width);
+        System.out.println("Pixel Grid Height: " + height);
+        System.out.println("Start X: " + startX + ", Start Y: " + startY);
     }
 
     /**
@@ -73,6 +88,28 @@ public class PixelManager {
      */
     public Pixel[][] getPixelGrid() {
         return pixelGrid;
+    }
+
+    /**
+     * Resets the displacement (celkovaVychylka) of all pixels to a specified value.
+     * For the reset functionality, it will set all celkovaVychylka values to 0.
+     */
+    public void resetPixelGridDisplacement() {
+        if (pixelGrid != null) {
+            for (int x = 0; x < width; x++) {
+                for (int y = 0; y < height; y++) {
+                    Pixel pixel = pixelGrid[x][y];
+                    if (pixel != null) {
+                        pixel.setDefault(); // Reset celkovaVychylka to 0
+                    }
+                }
+            }
+
+            // Debugging: Print confirmation of the reset
+            System.out.println("All pixel displacements have been reset.");
+        } else {
+            System.err.println("Pixel grid is not initialized.");
+        }
     }
 
     /**

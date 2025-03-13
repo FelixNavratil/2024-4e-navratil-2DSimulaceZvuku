@@ -313,6 +313,7 @@ public class WaveManager {
     }
 
     public void resetWaves() {
+        removeAllWaves(centerPane);
         activeWaves.clear();
 
     }
@@ -323,5 +324,13 @@ public class WaveManager {
 
     public List<SoundWave> getActiveWaves() {
         return activeWaves;
+    }
+
+    public void removeAllWaves(Pane centerPane){
+        for (SoundWave wave : activeWaves) {
+            if (centerPane != null) {
+                centerPane.getChildren().remove(wave);
+            }
+        }
     }
 }

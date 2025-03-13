@@ -48,6 +48,7 @@ public class Room0Controller implements BaseRoomControllerInterface {
     Rectangle bottomRectangle;
     Rectangle leftRectangle;
     Rectangle rightRectangle;
+    private int strokeWidth = 4;
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -180,6 +181,10 @@ public class Room0Controller implements BaseRoomControllerInterface {
         System.out.println("-----------inicializace skoncila-------------");
     }
 
+    public int getStroke(){
+        return (int)rectangle.getStrokeWidth();
+    }
+
     private void initializeRectangle(double x, double y) {
         if (rectangle != null) {
             rectangle.setWidth(rectangleSize);
@@ -187,7 +192,7 @@ public class Room0Controller implements BaseRoomControllerInterface {
             rectangle.setX(x- rectangleSize / 2);
             rectangle.setY(y- rectangleSize);
             rectangle.setStroke(Color.BLACK);
-            rectangle.setStrokeWidth(5);
+            rectangle.setStrokeWidth(strokeWidth);
 
 
             xMin = rectangle.getX();
@@ -394,14 +399,11 @@ public class Room0Controller implements BaseRoomControllerInterface {
         // Reset the WaveManager
         waveManager.resetWaves(); // Clear all active waves
 
-        // Remove all children from centerPane except the original rectangles
-        centerPane.getChildren().removeIf(node ->
-                node != rectangle &&
-                        node != topRectangle &&
-                        node != bottomRectangle &&
-                        node != leftRectangle &&
-                        node != rightRectangle
-        );
+        // Reset celkovaVychylka of each Pixel in the grid
+        if (pixelManager != null) {
+            pixelManager.resetPixelGridDisplacement();  // Reset all pixel displacements to 0
+        }
+
     }
 
     private void updateTimerLabel() {
