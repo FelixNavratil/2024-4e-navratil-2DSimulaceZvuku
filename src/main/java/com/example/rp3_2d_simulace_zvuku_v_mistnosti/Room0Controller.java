@@ -116,9 +116,10 @@ public class Room0Controller implements BaseRoomControllerInterface {
     //--------------------------------------------------------------------------------------------------------------------------------------------------------
     // inicializace waveManazera a waveFactory
     private WaveFactory waveFactory = new WaveFactory();
-    private WaveManager waveManager = new WaveManager(waveFactory, centerPane);
-    private Timeline waveTimeline;
     PixelManager pixelManager;
+    private WaveManager waveManager = new WaveManager(waveFactory, centerPane, pixelManager);
+    private Timeline waveTimeline;
+
 
     public void setSceneDimensions(Scene scene, int height, int width) {
 
@@ -162,11 +163,13 @@ public class Room0Controller implements BaseRoomControllerInterface {
     public void initialize() {
         System.out.println("-----------inicializace zacala-------------");
         updateLayout();
+        // Initialize the PixelManager with this Room0Controller
+        pixelManager = new PixelManager(this);
         waveFactory = new WaveFactory();
         if (centerPane == null) {
             System.err.println("Error: centerPane is null. Check your FXML file.");
         }
-        waveManager = new WaveManager(waveFactory, centerPane);
+        waveManager = new WaveManager(waveFactory, centerPane, pixelManager);
 
         createTimeline();
         buttonResume.setDisable(true);
@@ -175,8 +178,7 @@ public class Room0Controller implements BaseRoomControllerInterface {
         centerPane.setPrefHeight(room0Height);
         centerPane.setPrefWidth(room0Width);
 
-        // Initialize the PixelManager with this Room0Controller
-        pixelManager = new PixelManager(this);
+
 
         System.out.println("-----------inicializace skoncila-------------");
     }

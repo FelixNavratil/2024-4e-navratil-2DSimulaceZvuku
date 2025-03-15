@@ -13,14 +13,58 @@ import java.util.Map;
 
 
 /**
- * TODO udelej hledani bodu vice efektivni
+ * TODO udelej hledani bodu vice efektivni zkus Bresenham’s Circle Drawing Algorithm
  */
 public class SoundWave extends Circle {
     private double x;          // Starting X position
     private double y;          // Starting Y position
     private int currentRadius = 1;   // The current radius of the wave
     private int amplitude;
-    Map<Point, Integer> pointMap = new HashMap<>();
+    PixelManager pixelManager;
+    Pixel[][] pixelGrid;
+
+    /**
+     * Constructor initializes the SoundWave object, its position, and relevant fields.
+     * It also generates the mathematical representation of the sound wave circle.
+     */
+    public SoundWave(double x, double y, BaseRoomControllerInterface controller, int radius, int okamzitaVychylka, int amplitude, int direction) {
+        super(x, y, 0); // Initialize circle with position (x, y) and radius 0
+        this.x = x;
+        this.y = y;
+        this.currentRadius = radius;
+        this.amplitude = amplitude;
+        this.okamzitaVychylka = okamzitaVychylka;
+        this.direction = direction;
+
+        // Initialize the room and geometric properties
+        this.controller = controller;
+        roomWalls = controller.getRoomWalls();
+        center = new Point(x, y);
+        this.creationTime = System.currentTimeMillis(); // Store creation time
+        initializeLines(x, y);
+
+        // Generate the mathematical representation
+        this.mathRepresentation = calculateMathRepresentation();
+
+        // Initialize other properties
+        this.setStrokeWidth(1);          // Outline thickness
+        this.setFill(Color.TRANSPARENT); // Transparent fill
+        this.setMouseTransparent(true);
+
+        topLeft = controller.getRoomCorners().get(0);
+        bottomLeft = controller.getRoomCorners().get(1);
+        bottomRight = controller.getRoomCorners().get(2);
+        topRight = controller.getRoomCorners().get(3);
+        intersections = getIntersectionsWithWalls(x, y);
+
+        updateColor(PERIODA);
+    }
+
+    public void setPixelManager(PixelManager pixelManager){
+        this.pixelManager = pixelManager;
+        pixelGrid = pixelManager.getPixelGrid();
+    }
+
 
     // **New field to store the mathematical representation of the circle**
     private String mathRepresentation;
@@ -329,48 +373,6 @@ public class SoundWave extends Circle {
     }
 
 
-
-
-
-
-
-    /**
-     * Constructor initializes the SoundWave object, its position, and relevant fields.
-     * It also generates the mathematical representation of the sound wave circle.
-     */
-    public SoundWave(double x, double y, BaseRoomControllerInterface controller, int radius, int okamzitaVychylka, int amplitude, int direction) {
-        super(x, y, 0); // Initialize circle with position (x, y) and radius 0
-        this.x = x;
-        this.y = y;
-        this.currentRadius = radius;
-        this.amplitude = amplitude;
-        this.okamzitaVychylka = okamzitaVychylka;
-        this.direction = direction;
-
-        // Initialize the room and geometric properties
-        this.controller = controller;
-        roomWalls = controller.getRoomWalls();
-        center = new Point(x, y);
-        this.creationTime = System.currentTimeMillis(); // Store creation time
-        initializeLines(x, y);
-
-        // Generate the mathematical representation
-        this.mathRepresentation = calculateMathRepresentation();
-
-        // Initialize other properties
-        this.setStrokeWidth(1);          // Outline thickness
-        this.setFill(Color.TRANSPARENT); // Transparent fill
-        this.setMouseTransparent(true);
-
-        topLeft = controller.getRoomCorners().get(0);
-        bottomLeft = controller.getRoomCorners().get(1);
-        bottomRight = controller.getRoomCorners().get(2);
-        topRight = controller.getRoomCorners().get(3);
-        intersections = getIntersectionsWithWalls(x, y);
-
-        updateColor(PERIODA);
-    }
-
     /**
      * Grows the wave's radius by a fixed amount (can be dynamic based on time).
      */
@@ -382,7 +384,7 @@ public class SoundWave extends Circle {
         // Update the mathematical representation when the wave grows
         this.mathRepresentation = calculateMathRepresentation();
 
-        listPointsInCircleOptimizedFilteredEarly();
+        generateCircleUsingBresenhamsFiltered();
     }
 
     private void updateColor(double perioda){
@@ -481,74 +483,6 @@ public class SoundWave extends Circle {
     }
 
     /**
-     * Returns a mathematical representation of the sound wave circle in the form:
-     *      (x − a)² + (y − b)² = r²
-     * where (a, b) is the center of the circle and r is the current radius.
-     * This represents the circle as a set of all points that satisfy the equation.
-     *
-     * @return A String representing the mathematical representation of the circle.
-     */
-    public String mathematicalRepresentation() {
-        // Circle center coordinates
-        double a = this.getCenterX(); // X-coordinate of the center
-        double b = this.getCenterY(); // Y-coordinate of the center
-        double r = this.getRadius();  // Current radius of the sound wave
-
-        // Format the mathematical representation
-        return String.format("(x - %.1f)^2 + (y - %.1f)^2 = %.1f^2", a, b, r);
-    }
-
-
-    public void listPointsInCircleOptimizedFilteredEarly() {
-        double a = this.x;                  // Circle center X-coordinate
-        double b = this.y;                  // Circle center Y-coordinate
-        int r = this.currentRadius;         // Radius of the circle
-        int okamzitaVychylkaValue = getokamzitaVychylka();
-
-        // Midpoint Circle Algorithm
-        int x = 0;
-        int y = r;
-        int d = 1 - r; // Decision variable
-
-        // Add only points that may fall in the rectangle
-        addCirclePointsFilteredEarly(x, y, a, b, okamzitaVychylkaValue);
-
-        while (x <= y) {
-            if (d < 0) {
-                d = d + 2 * x + 3; // Move horizontally
-            } else {
-                d = d + 2 * (x - y) + 5; // Move diagonally
-                y--;
-            }
-            x++;
-
-            // Add only points that may be in the rectangle
-            addCirclePointsFilteredEarly(x, y, a, b, okamzitaVychylkaValue);
-        }
-
-        // Confirm total points added
-        //System.out.println("Total points added (early filtered): " + pointMap.size());
-    }
-
-    /**
-     * Adds only points that are within the rectangle after basic symmetry checks.
-     */
-    private void addCirclePointsFilteredEarly(int x, int y, double a, double b, int okamzitaVychylkaValue) {
-        // Early filtering: Check if at least one symmetric point is in the rectangle
-        if (isAnySymmetricPointInRectangle(x, y, a, b)) {
-            // Add only valid symmetric points
-            addPointToMapIfInRectangle((int) (a + x), (int) (b + y), okamzitaVychylkaValue); // Quadrant 1
-            addPointToMapIfInRectangle((int) (a - x), (int) (b + y), okamzitaVychylkaValue); // Quadrant 2
-            addPointToMapIfInRectangle((int) (a + x), (int) (b - y), okamzitaVychylkaValue); // Quadrant 4
-            addPointToMapIfInRectangle((int) (a - x), (int) (b - y), okamzitaVychylkaValue); // Quadrant 3
-            addPointToMapIfInRectangle((int) (a + y), (int) (b + x), okamzitaVychylkaValue); // Transposed 1
-            addPointToMapIfInRectangle((int) (a - y), (int) (b + x), okamzitaVychylkaValue); // Transposed 2
-            addPointToMapIfInRectangle((int) (a + y), (int) (b - x), okamzitaVychylkaValue); // Transposed 3
-            addPointToMapIfInRectangle((int) (a - y), (int) (b - x), okamzitaVychylkaValue); // Transposed 4
-        }
-    }
-
-    /**
      * Adds a point to the map if it lies within the allowed rectangle.
      *
      * @param x                     The x-coordinate of the point.
@@ -558,30 +492,79 @@ public class SoundWave extends Circle {
     private void addPointToMapIfInRectangle(int x, int y, int okamzitaVychylkaValue) {
         // Check if the point is within the specified rectangle
         if (isInRectangle(x, y)) {
-            // If the point is inside the rectangle, add it to the map
-            Point point = new Point(x, y);
-            if (!pointMap.containsKey(point)) { // Avoid adding duplicate points
-                pointMap.put(point, okamzitaVychylkaValue);
+            // Calculate the grid coordinates using the static method in Pixel
 
-                // Optional: Print for debugging purposes
-                //System.out.println("Point (" + x + ", " + y + ") added with okamzitaVychylka = " + okamzitaVychylkaValue);
+            int gridX = Pixel.getGridX(x, controller.getXMin());
+            int gridY = Pixel.getGridY(y, controller.getYMin());
+
+            // Validate that the calculated grid indices are within bounds
+            if (gridX >= 0 && gridX < pixelGrid.length && gridY >= 0 && gridY < pixelGrid[0].length) {
+                //Pixel pixel = pixelGrid[gridX][gridY];
+                pixelManager.setPixelColor(gridX,gridY,okamzitaVychylkaValue);
+
             }
+
+        }
+    }
+
+    public void generateCircleUsingBresenhamsFiltered() {
+        int a = (int) this.x;  // Circle center X-coordinate
+        int b = (int) this.y;  // Circle center Y-coordinate
+        int r = this.currentRadius;  // Radius of the circle
+        int okamzitaVychylkaValue = getokamzitaVychylka();
+
+        int x = 0;
+        int y = r;
+        int d = 3 - 2 * r;  // Decision variable
+
+        // Add initial symmetric points if at least one is in the rectangle
+        addSymmetricPointsFiltered(x, y, a, b, okamzitaVychylkaValue);
+
+        // Loop through each step while x <= y
+        while (x <= y) {
+            x++;  // Move to the next horizontal position
+
+            // Update the decision variable and adjust y if needed
+            if (d < 0) {
+                d += 4 * x + 6; // Move horizontally
+            } else {
+                y--;           // Move diagonally (horizontal + vertical)
+                d += 4 * (x - y) + 10;
+            }
+
+            // Add symmetric points for the current (x, y)
+            addSymmetricPointsFiltered(x, y, a, b, okamzitaVychylkaValue);
+        }
+    }
+
+    private void addSymmetricPointsFiltered(int x, int y, int a, int b, int okamzitaVychylkaValue) {
+        // Perform early filtering: Add points only if at least one symmetric point is within the rectangle
+        if (isAnySymmetricPointInRectangle(x, y, a, b)) {
+            addPointToMapIfInRectangle(a + x, b + y, okamzitaVychylkaValue); // Quadrant 1
+            addPointToMapIfInRectangle(a - x, b + y, okamzitaVychylkaValue); // Quadrant 2
+            addPointToMapIfInRectangle(a + x, b - y, okamzitaVychylkaValue); // Quadrant 4
+            addPointToMapIfInRectangle(a - x, b - y, okamzitaVychylkaValue); // Quadrant 3
+            addPointToMapIfInRectangle(a + y, b + x, okamzitaVychylkaValue); // Transposed 1
+            addPointToMapIfInRectangle(a - y, b + x, okamzitaVychylkaValue); // Transposed 2
+            addPointToMapIfInRectangle(a + y, b - x, okamzitaVychylkaValue); // Transposed 3
+            addPointToMapIfInRectangle(a - y, b - x, okamzitaVychylkaValue); // Transposed 4
         }
     }
 
     /**
      * Checks if any of the 8 symmetric points for (x, y) are inside the rectangle.
      */
-    private boolean isAnySymmetricPointInRectangle(int x, int y, double a, double b) {
-        return isInRectangle((int) (a + x), (int) (b + y)) ||
-                isInRectangle((int) (a - x), (int) (b + y)) ||
-                isInRectangle((int) (a + x), (int) (b - y)) ||
-                isInRectangle((int) (a - x), (int) (b - y)) ||
-                isInRectangle((int) (a + y), (int) (b + x)) ||
-                isInRectangle((int) (a - y), (int) (b + x)) ||
-                isInRectangle((int) (a + y), (int) (b - x)) ||
-                isInRectangle((int) (a - y), (int) (b - x));
+    private boolean isAnySymmetricPointInRectangle(int x, int y, int a, int b) {
+        return isInRectangle(a + x, b + y) ||
+                isInRectangle(a - x, b + y) ||
+                isInRectangle(a + x, b - y) ||
+                isInRectangle(a - x, b - y) ||
+                isInRectangle(a + y, b + x) ||
+                isInRectangle(a - y, b + x) ||
+                isInRectangle(a + y, b - x) ||
+                isInRectangle(a - y, b - x);
     }
+
 
 
 

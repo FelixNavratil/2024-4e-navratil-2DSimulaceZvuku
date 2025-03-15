@@ -13,6 +13,7 @@ public class WaveManager {
 
     // Reference to a WaveFactory to create new waves
     private WaveFactory waveFactory;
+    private PixelManager pixelManager;
 
     // Flag to track whether waves are currently running
     private boolean isRunning = false;
@@ -23,11 +24,12 @@ public class WaveManager {
     private Calculator calculator = new Calculator();
 
     // Initializes a WaveManager instance.
-    public WaveManager(WaveFactory waveFactory, Pane centerPane) {
+    public WaveManager(WaveFactory waveFactory, Pane centerPane, PixelManager pixelManager) {
         this.waveFactory = waveFactory;
         this.activeWaves = new ArrayList<>();
         this.isRunning = false;
         this.centerPane = centerPane;
+        this.pixelManager = pixelManager;
     }
 
     //Creates a new sound wave at the given coordinates (x, y) with the specified radius.
@@ -38,10 +40,11 @@ public class WaveManager {
         }
         SoundWave wave = waveFactory.createWave(x, y, controller, radius, okamzitaVychylka, amplitude, direction);
         activeWaves.add(wave);
-        centerPane.getChildren().add(wave);
+        wave.setPixelManager(pixelManager);
+        //centerPane.getChildren().add(wave);
 
         //making the rectangles appear above the waves
-        controller.overlayRectangles();
+        //controller.overlayRectangles();
     }
 
 

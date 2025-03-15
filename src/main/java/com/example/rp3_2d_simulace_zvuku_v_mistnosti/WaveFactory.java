@@ -30,6 +30,7 @@ public class WaveFactory {
         System.out.println("direction: " + direction);
         System.out.println("---------------");
 */
+
         return new SoundWave(x, y, controller, radius, okamzitaVychylka, amplitude, direction);
     }
 

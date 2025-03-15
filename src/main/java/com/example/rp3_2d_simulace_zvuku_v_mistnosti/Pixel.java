@@ -15,7 +15,11 @@ public class Pixel extends Rectangle{
     private double realY;    // The real-world y-coordinate on the scene
     private int celkovaVychylka;
     private Rectangle rectangle;   // The visual representation of the pixel as a rectangle
-    private static final double PIXELSIZE = 2;
+    private static  double PIXELSIZE;
+
+    public void setPixelSize(double pixelSize) {
+        this.PIXELSIZE = pixelSize;
+    }
 
     // Constructor for the pixel
     public Pixel(int gridX, int gridY, double realX, double realY) {
@@ -23,7 +27,7 @@ public class Pixel extends Rectangle{
         this.gridY = gridY;
         this.realX = realX;
         this.realY = realY;
-        celkovaVychylka = 50;
+        celkovaVychylka = 0;
 
         // Initialize the rectangle to represent this pixel, with default properties
         rectangle = new Rectangle();
@@ -33,6 +37,17 @@ public class Pixel extends Rectangle{
         rectangle.setHeight(PIXELSIZE);    // Set the rectangle height (1 pixel)
         setDefault();
 
+    }
+
+    public static int getGridX(double realX, double xMin) {
+        return (int) Math.floor((realX - xMin) / PIXELSIZE);
+    }
+
+    /**
+     * Get the GridY index from real-world coordinates, considering room position.
+     */
+    public static int getGridY(double realY, double yMIn) {
+        return (int) Math.floor((realY - yMIn) / PIXELSIZE);
     }
 
     public int getCelkovaVychylka() {
@@ -95,8 +110,9 @@ public class Pixel extends Rectangle{
 
 
     private Color createColor(int celkovaVychylka) {
+        System.out.println("celkovaVychylka= "+celkovaVychylka);
 
-        if (celkovaVychylka >= 90 && celkovaVychylka <= 100) {
+        if (celkovaVychylka >= 90) {
             // Assign color for interval 90 <= CV <= 100
             return javafx.scene.paint.Color.web("#0100FF"); // Fixed hex code for JavaFX Color
 
@@ -176,7 +192,7 @@ public class Pixel extends Rectangle{
             // Assign color for interval -90 <= CV < -80
             return javafx.scene.paint.Color.web("#FF1C1C");
 
-        } else if (celkovaVychylka >= -100 && celkovaVychylka < -90) {
+        } else if ( celkovaVychylka < -90) {
             // Assign color for interval -100 <= CV < -90
             return javafx.scene.paint.Color.web("#FF0000");
 

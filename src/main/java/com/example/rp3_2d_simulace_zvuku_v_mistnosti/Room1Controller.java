@@ -86,10 +86,10 @@ public class Room1Controller implements BaseRoomControllerInterface {
     private int millisecondsElapsed = 0;
 
     // Wave-related variables
-    private WaveFactory waveFactory = new WaveFactory();
-    private WaveManager waveManager = new WaveManager(waveFactory, centerPane);
-    private Timeline waveTimeline;
     PixelManager pixelManager;
+    private WaveFactory waveFactory = new WaveFactory();
+    private WaveManager waveManager = new WaveManager(waveFactory, centerPane, pixelManager);
+    private Timeline waveTimeline;
 
     public void setSceneDimensions(Scene scene, int height, int width) {
         stage.setScene(scene);
@@ -117,9 +117,10 @@ public class Room1Controller implements BaseRoomControllerInterface {
 
     @FXML
     public void initialize() {
-
+// Initialize the PixelManager with this Room0Controller
+        pixelManager = new PixelManager(this);
         waveFactory = new WaveFactory();
-        waveManager = new WaveManager(waveFactory, centerPane);
+        waveManager = new WaveManager(waveFactory, centerPane, pixelManager);
         updateLayout();
 
         createTimeline();
@@ -130,8 +131,7 @@ public class Room1Controller implements BaseRoomControllerInterface {
         centerPane.setPrefHeight(room1Height);
         centerPane.setPrefWidth(room1Width);
 
-        // Initialize the PixelManager with this Room0Controller
-        pixelManager = new PixelManager(this);
+
     }
 
     private void createTimeline() {

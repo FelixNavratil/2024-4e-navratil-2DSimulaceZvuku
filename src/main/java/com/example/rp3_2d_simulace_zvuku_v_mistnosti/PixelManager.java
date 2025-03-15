@@ -56,6 +56,7 @@ public class PixelManager {
 
                 // Create a new pixel and add it to the grid
                 pixelGrid[x][y] = new Pixel(x, y, realX, realY);
+                pixelGrid[x][y].setPixelSize(PIXELSIZE);
             }
         }
 
@@ -87,6 +88,16 @@ public class PixelManager {
      */
     public Pixel[][] getPixelGrid() {
         return pixelGrid;
+    }
+
+    /**
+     *  add okamzitaVychylka to celkovaVychylka in a specific pixel
+     * @param gridX
+     * @param gridY
+     * @param okamzitaVychylka
+     */
+    public void setPixelColor(int gridX, int gridY, int okamzitaVychylka){
+        pixelGrid[gridX][gridY].addVychylka(okamzitaVychylka);
     }
 
     /**
@@ -122,6 +133,9 @@ public class PixelManager {
                 System.out.println(pixel); // toString() in the Pixel class will handle the formatting
             }
         }
+    }
+    public double getPixelSize(){
+        return PIXELSIZE;
     }
 
     // Additional methods omitted for brevity, unchanged...
