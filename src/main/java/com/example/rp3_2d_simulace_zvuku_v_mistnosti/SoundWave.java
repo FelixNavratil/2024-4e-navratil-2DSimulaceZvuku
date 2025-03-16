@@ -7,9 +7,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.util.Duration;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 /**
@@ -22,6 +20,7 @@ public class SoundWave extends Circle {
     private int amplitude;
     PixelManager pixelManager;
     Pixel[][] pixelGrid;
+    private int xMin, xMax, yMin, yMax;
 
     /**
      * Constructor initializes the SoundWave object, its position, and relevant fields.
@@ -43,52 +42,32 @@ public class SoundWave extends Circle {
         this.creationTime = System.currentTimeMillis(); // Store creation time
         initializeLines(x, y);
 
-        // Generate the mathematical representation
-        this.mathRepresentation = calculateMathRepresentation();
+
+        this.xMin = controller.getXMin();
+        this.xMax = controller.getXMax();
+        this.yMin = controller.getYMin();
+        this.yMax = controller.getYMax();
+
 
         // Initialize other properties
-        this.setStrokeWidth(1);          // Outline thickness
+        /*this.setStrokeWidth(1);          // Outline thickness
         this.setFill(Color.TRANSPARENT); // Transparent fill
         this.setMouseTransparent(true);
-
+*/
         topLeft = controller.getRoomCorners().get(0);
         bottomLeft = controller.getRoomCorners().get(1);
         bottomRight = controller.getRoomCorners().get(2);
         topRight = controller.getRoomCorners().get(3);
         intersections = getIntersectionsWithWalls(x, y);
 
-        updateColor(PERIODA);
+        //updateColor(PERIODA);
     }
 
     public void setPixelManager(PixelManager pixelManager){
         this.pixelManager = pixelManager;
         pixelGrid = pixelManager.getPixelGrid();
     }
-
-
-    // **New field to store the mathematical representation of the circle**
-    private String mathRepresentation;
-
-    // Getter for the field mathRepresentation
-    public String getMathRepresentation() {
-        return mathRepresentation;
-    }
-
-    /**
-     * Calculates the mathematical representation of the sound wave circle in the form:
-     *      (x − a)² + (y − b)² = r²
-     * where (a, b) is the center of the circle and r is the current radius.
-     *
-     * @return The mathematical representation of the circle as a String.
-     */
-    private String calculateMathRepresentation() {
-        double a = this.x;             // X-coordinate of the center
-        double b = this.y;             // Y-coordinate of the center
-        double r = this.currentRadius; // Radius of the circle
-
-        // Format the representation using the circle equation
-        return String.format("(x - %.1f)^2 + (y - %.1f)^2 = %.1f^2", a, b, r);
-    }
+    
 
     public int getAmplitude() {
         return amplitude;
@@ -373,20 +352,8 @@ public class SoundWave extends Circle {
     }
 
 
-    /**
-     * Grows the wave's radius by a fixed amount (can be dynamic based on time).
-     */
-    public void grow() {
-
-        currentRadius += 1;  // Example growth logic (adjust increment as needed)
-        this.setRadius(currentRadius);
-
-        // Update the mathematical representation when the wave grows
-        this.mathRepresentation = calculateMathRepresentation();
-
-        generateCircleUsingBresenhamsFiltered();
-    }
-
+    
+/*
     private void updateColor(double perioda){
         Timeline colorTransition = new Timeline(
                 new KeyFrame(Duration.ZERO,
@@ -403,7 +370,7 @@ public class SoundWave extends Circle {
         colorTransition.setAutoReverse(true); // Reverse the transition after completing
         colorTransition.play();
     }
-
+*/
     public int getCurrentRadius() {
         return currentRadius;
     }
@@ -429,7 +396,7 @@ public class SoundWave extends Circle {
     }
 
     public boolean isInRectangle(int x, int y){
-        return x > controller.getXMin() && x < controller.getXMax() && y > controller.getYMin() && y < controller.getYMax();
+        return x > xMin && x < xMax && y > yMin && y < yMax;
     }
 
     public boolean isBellowRectangle(double x, double y){
@@ -464,8 +431,6 @@ public class SoundWave extends Circle {
         return x < controller.getXMin() && y > controller.getYMax();
     }
 
-
-
     /**
      * Checks if the wave is older than a specified lifetime (in milliseconds).
      * @param maxAge The lifetime in milliseconds (e.g., 5000 for 5 seconds).
@@ -482,6 +447,13 @@ public class SoundWave extends Circle {
         return effectiveAge > maxAge;
     }
 
+
+
+
+    // Use a Set to track pixels added
+    private final Set<PixelCoordinate> visitedPixels = new HashSet<>();
+    private final Set<PixelCoordinate> duplicatePixels = new HashSet<>(); // To store duplicates for debugging
+
     /**
      * Adds a point to the map if it lies within the allowed rectangle.
      *
@@ -491,7 +463,7 @@ public class SoundWave extends Circle {
      */
     private void addPointToMapIfInRectangle(int x, int y, int okamzitaVychylkaValue) {
         // Check if the point is within the specified rectangle
-        if (isInRectangle(x, y)) {
+        if (x >= xMin && x <= xMax && y >= yMin && y <= yMax) {
             // Calculate the grid coordinates using the static method in Pixel
 
             int gridX = Pixel.getGridX(x, controller.getXMin());
@@ -499,8 +471,15 @@ public class SoundWave extends Circle {
 
             // Validate that the calculated grid indices are within bounds
             if (gridX >= 0 && gridX < pixelGrid.length && gridY >= 0 && gridY < pixelGrid[0].length) {
-                //Pixel pixel = pixelGrid[gridX][gridY];
-                pixelManager.setPixelColor(gridX,gridY,okamzitaVychylkaValue);
+                // Create a PixelCoordinate object
+                PixelCoordinate pixelCoord = new PixelCoordinate(gridX, gridY);
+
+                if (visitedPixels.contains(pixelCoord)) {
+                    duplicatePixels.add(pixelCoord); // Log duplicate pixel
+                } else {
+                    visitedPixels.add(pixelCoord);  // Add to the set of visited pixels
+                    pixelGrid[gridX][gridY].addVychylka(okamzitaVychylkaValue);
+                }
 
             }
 
@@ -565,7 +544,34 @@ public class SoundWave extends Circle {
                 isInRectangle(a - y, b - x);
     }
 
+    /**
+     * Grows the wave's radius by a fixed amount (can be dynamic based on time).
+     */
+    public void grow() {
 
+        currentRadius += 1;  // Example growth logic (adjust increment as needed)
+        this.setRadius(currentRadius);
+
+        generateCircleUsingBresenhamsFiltered();
+
+        // Log duplicate data
+        //logDuplicatePixels();
+    }
+
+    /**
+     * Logs duplicate pixels detected during circle generation.
+     */
+    public void logDuplicatePixels() {
+        if (!duplicatePixels.isEmpty()) {
+            System.out.println("Duplicate Pixels Detected:");
+            for (PixelCoordinate pixel : duplicatePixels) {
+                System.out.println("Duplicate Pixel: " + pixel);
+            }
+            System.out.println("Total Duplicate Pixels: " + duplicatePixels.size());
+        } else {
+            System.out.println("No duplicate pixels detected.");
+        }
+    }
 
 
 

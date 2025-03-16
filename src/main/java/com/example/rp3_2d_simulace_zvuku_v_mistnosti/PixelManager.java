@@ -12,9 +12,8 @@ public class PixelManager {
     private Pixel[][] pixelGrid; // 2D grid of all pixels in the room
     private int width;  // Width of the room
     private int height; // Height of the room
-    private Map<String, Double> pixelDisplacements = new HashMap<>();
     private BaseRoomControllerInterface roomController;
-    private static final double PIXELSIZE = 2;
+    private static final double PIXELSIZE = 4;
 
     public PixelManager(BaseRoomControllerInterface roomController) {
         this.roomController = roomController;
@@ -97,7 +96,11 @@ public class PixelManager {
      * @param okamzitaVychylka
      */
     public void setPixelColor(int gridX, int gridY, int okamzitaVychylka){
-        pixelGrid[gridX][gridY].addVychylka(okamzitaVychylka);
+        pixelGrid[gridX][gridY].setCelkovaVychylka(okamzitaVychylka);
+    }
+
+    public void setPixelToDefault(int gridX, int gridY){
+        pixelGrid[gridX][gridY].setDefault();
     }
 
     /**
@@ -122,21 +125,16 @@ public class PixelManager {
         }
     }
 
-    /**
-     * Prints the details of each Pixel in the grid, including real-world scene coordinates.
-     */
-    public void printPixelGrid() {
-        System.out.println("Pixel Grid:");
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                Pixel pixel = pixelGrid[x][y];
-                System.out.println(pixel); // toString() in the Pixel class will handle the formatting
-            }
-        }
-    }
+
     public double getPixelSize(){
         return PIXELSIZE;
     }
+
+    public Pixel getPixel(int gridX, int gridY){
+        return pixelGrid[gridX][gridY];
+    }
+
+
 
     // Additional methods omitted for brevity, unchanged...
 }
