@@ -1,11 +1,7 @@
 package com.example.rp3_2d_simulace_zvuku_v_mistnosti;
 
-import javafx.animation.KeyFrame;
-import javafx.animation.KeyValue;
-import javafx.animation.Timeline;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import javafx.util.Duration;
 
 import java.util.*;
 
@@ -16,11 +12,20 @@ import java.util.*;
 public class SoundWave extends Circle {
     private double x;          // Starting X position
     private double y;          // Starting Y position
-    private int currentRadius = 1;   // The current radius of the wave
+    private int outerRadius;   // The current radius of the wave
+    private final int deltaR = 50;   // Fixed difference between radii (donut thickness)
+    private int innerRadius = 0;      // Inner circle radius (calculated as currentRadius - deltaR)
+
+    private Circle innerCircle; // Circle object to represent the inner boundary (when it appears)
+
     private int amplitude;
     PixelManager pixelManager;
     Pixel[][] pixelGrid;
     private int xMin, xMax, yMin, yMax;
+
+    //nezapomen zmenit periodu i v soundWave
+    public  int PERIODA = 3;
+    private int okamzitaVychylka;
 
     /**
      * Constructor initializes the SoundWave object, its position, and relevant fields.
@@ -30,7 +35,7 @@ public class SoundWave extends Circle {
         super(x, y, 0); // Initialize circle with position (x, y) and radius 0
         this.x = x;
         this.y = y;
-        this.currentRadius = radius;
+        this.outerRadius = radius;
         this.amplitude = amplitude;
         this.okamzitaVychylka = okamzitaVychylka;
         this.direction = direction;
@@ -50,17 +55,46 @@ public class SoundWave extends Circle {
 
 
         // Initialize other properties
-        /*this.setStrokeWidth(1);          // Outline thickness
+        this.setStroke( Color.BLACK);
+        this.setStrokeWidth(1);          // Outline thickness
         this.setFill(Color.TRANSPARENT); // Transparent fill
         this.setMouseTransparent(true);
-*/
+
         topLeft = controller.getRoomCorners().get(0);
         bottomLeft = controller.getRoomCorners().get(1);
         bottomRight = controller.getRoomCorners().get(2);
         topRight = controller.getRoomCorners().get(3);
         intersections = getIntersectionsWithWalls(x, y);
 
+        // Initialize the inner circle (it will be made visible later)
+        /*
+        innerCircle = new Circle();
+        innerCircle.setCenterX(x);
+        innerCircle.setCenterY(y);
+        innerCircle.setStrokeWidth(2.0);
+        innerCircle.setFill(null); // Ensures it's a "ring"
+        innerCircle.setStroke(javafx.scene.paint.Color.BLUE); // Match outer circle stroke color
+
+         */
+
         //updateColor(PERIODA);
+    }
+
+    private void createInnerCircle(double x , double y, int innerRadius) {
+        innerCircle = new Circle(x, y, innerRadius);
+        innerCircle.setMouseTransparent(true);
+        innerCircle.setStroke(Color.RED);
+        innerCircle.setStrokeWidth(1);
+        innerCircle.setFill(null);
+    }
+
+    public Circle getInnerCircle() {
+        if (outerRadius >deltaR)return innerCircle;
+        else return null;
+    }
+
+    public int getDeltaR() {
+        return deltaR;
     }
 
     public void setPixelManager(PixelManager pixelManager){
@@ -73,8 +107,7 @@ public class SoundWave extends Circle {
         return amplitude;
     }
 
-    private final int PERIODA = 4;
-    private int okamzitaVychylka;
+
 
     // New field to control the direction (1 for normal, -1 for opposite/progressing backwards)
     private int direction;
@@ -274,12 +307,13 @@ public class SoundWave extends Circle {
      *
      *
      */
+
     public int getokamzitaVychylka() {
         if (direction == 1) {
             // Ensure amplitude is positive
             amplitude = Math.max(amplitude, 0);
 
-            // Cycle duration (perioda) is fixed to 1 second
+            // Cycle duration (perioda)
             double cycleDuration =  PERIODA;
 
             // Total number of steps (for full cycle)
@@ -347,6 +381,12 @@ public class SoundWave extends Circle {
     }
 
 
+/*
+    public int getokamzitaVychylka() {
+        return 100;
+    }*/
+
+
     public Point getCenter() {
         return center;
     }
@@ -371,8 +411,12 @@ public class SoundWave extends Circle {
         colorTransition.play();
     }
 */
-    public int getCurrentRadius() {
-        return currentRadius;
+    public int getOuterRadius() {
+        return outerRadius;
+    }
+
+    public int getInnerRadius() {
+        return innerRadius; // Inner radius
     }
 
     public void pause() {
@@ -455,48 +499,14 @@ public class SoundWave extends Circle {
     private final Set<PixelCoordinate> duplicatePixels = new HashSet<>(); // To store duplicates for debugging
     private final Set<PixelCoordinate> activePixelCoordinates = new HashSet<>(); // Track coordinates of active pixels
 
-
-    /**
-     * Updates active pixels by resetting outdated ones to default.
-     * This method ensures only outdated pixels are processed.
-     */
-    public void updateActivePixels() {
-        // Use an iterator to safely modify the set while iterating
-        Iterator<PixelCoordinate> iterator = activePixelCoordinates.iterator();
-
-        while (iterator.hasNext()) {
-            PixelCoordinate coord = iterator.next();
-
-            // Access the pixel from the grid using the coordinates
-            Pixel pixel = pixelGrid[coord.getX()][coord.getY()];
-
-            if (pixel.hasTimeElapsed()) {
-                pixel.setDefault(); // Reset pixel to its default state
-                iterator.remove();  // Remove the coordinate from activePixelCoordinates
-            }
-        }
+    public Set<PixelCoordinate> getactivePixelCoordinates   () {
+        return activePixelCoordinates;
     }
 
-    /**
-     * Adds a pixel coordinate to the set of active pixels.
-     *
-     * @param gridX The x-coordinate in the grid.
-     * @param gridY The y-coordinate in the grid.
-     */
-    private void activatePixelCoordinate(int gridX, int gridY) {
-        PixelCoordinate coord = new PixelCoordinate(gridX, gridY);
 
-        // Add the coordinate to the active set
-        activePixelCoordinates.add(coord);
-    }
 
-    /**
-     * Adds a point to the map if it lies within the allowed rectangle.
-     *
-     * @param x                     The x-coordinate of the point.
-     * @param y                     The y-coordinate of the point.
-     * @param okamzitaVychylkaValue The value to associate with the point in the map.
-     */
+
+
     private void addPointToMapIfInRectangle(int x, int y, int okamzitaVychylkaValue) {
         // Check if the point is within the specified rectangle
         if (x >= xMin && x <= xMax && y >= yMin && y <= yMax) {
@@ -515,6 +525,7 @@ public class SoundWave extends Circle {
                 } else {
                     visitedPixels.add(pixelCoord);  // Add to the set of visited pixels
                     pixelGrid[gridX][gridY].addVychylka(okamzitaVychylkaValue);
+
                     // Activate pixel for periodic checks
                     activatePixelCoordinate(gridX, gridY);
                 }
@@ -524,19 +535,10 @@ public class SoundWave extends Circle {
         }
     }
 
-    /**
-     * Simulates periodic updates of pixels.
-     * This method is called periodically (e.g., in a game loop or simulation tick).
-     */
-    public void simulateTick() {
-        // Update only active pixels
-        updateActivePixels();
-    }
-
-    public void generateCircleUsingBresenhamsFiltered() {
+    public void generateOuterCircleUsingBresenhamsFiltered() {
         int a = (int) this.x;  // Circle center X-coordinate
         int b = (int) this.y;  // Circle center Y-coordinate
-        int r = this.currentRadius;  // Radius of the circle
+        int r = this.outerRadius;  // Radius of the circle
         int okamzitaVychylkaValue = getokamzitaVychylka();
 
         int x = 0;
@@ -562,6 +564,84 @@ public class SoundWave extends Circle {
             addSymmetricPointsFiltered(x, y, a, b, okamzitaVychylkaValue);
         }
     }
+    /**
+     * Generates and removes pixels for the inner circle using Bresenham's Algorithm.
+     */
+    public void generateInnerCircleUsingBresenhamsFiltered() {
+        int a = (int) this.x; // Circle center X-coordinate
+        int b = (int) this.y; // Circle center Y-coordinate
+        int r = this.innerRadius; // Current inner radius
+        int okamzitaVychylkaValue = getokamzitaVychylka();
+
+        int x = 0, y = r;
+        int d = 3 - 2 * r; // Decision variable
+
+        // Add initial symmetric points
+        addSymmetricPointsFilteredInner(x, y, a, b, okamzitaVychylkaValue);
+
+        // Loop for generating circle points
+        while (x <= y) {
+            x++;
+
+            // Update decision variable
+            if (d < 0) {
+                d += 4 * x + 6;
+            } else {
+                y--;
+                d += 4 * (x - y) + 10;
+            }
+
+            // Add symmetrical points for the inner circle
+            addSymmetricPointsFilteredInner(x, y, a, b, okamzitaVychylkaValue);
+        }
+    }
+
+    /**
+     * Handles adding and clearing pixels for the new inner circle points.
+     */
+    private void addSymmetricPointsFilteredInner(int x, int y, int a, int b, int okamzitaVychylkaValue) {
+        if (isAnySymmetricPointInRectangle(x, y, a, b)) {
+            removePointFromMapIfInRectangle(a + x, b + y, okamzitaVychylkaValue); // Quadrant 1
+            removePointFromMapIfInRectangle(a - x, b + y, okamzitaVychylkaValue); // Quadrant 2
+            removePointFromMapIfInRectangle(a + x, b - y, okamzitaVychylkaValue); // Quadrant 4
+            removePointFromMapIfInRectangle(a - x, b - y, okamzitaVychylkaValue); // Quadrant 3
+            removePointFromMapIfInRectangle(a + y, b + x, okamzitaVychylkaValue); // Transposed 1
+            removePointFromMapIfInRectangle(a - y, b + x, okamzitaVychylkaValue); // Transposed 2
+            removePointFromMapIfInRectangle(a + y, b - x, okamzitaVychylkaValue); // Transposed 3
+            removePointFromMapIfInRectangle(a - y, b - x, okamzitaVychylkaValue); // Transposed 4
+        }
+    }
+
+    /**
+     * Removes a pixel from the map if it is within the rectangle (used for shrinking or clearing).
+     */
+    private void removePointFromMapIfInRectangle(int x, int y, int okamzitaVychylkaValue) {
+        if (x >= xMin && x <= xMax && y >= yMin && y <= yMax) {
+            int gridX = Pixel.getGridX(x, controller.getXMin());
+            int gridY = Pixel.getGridY(y, controller.getYMin());
+
+            if (gridX >= 0 && gridX < pixelGrid.length && gridY >= 0 && gridY < pixelGrid[0].length) {
+                PixelCoordinate pixelCoord = new PixelCoordinate(gridX, gridY);
+
+                // If the pixel was previously visited, remove any "inner circle" influence
+                if (visitedPixels.contains(pixelCoord)) {
+                    visitedPixels.remove(pixelCoord); // Stop tracking this pixel
+                    duplicatePixels.remove(pixelCoord); // Remove from duplicate list
+                    pixelGrid[gridX][gridY].setDefault(); // Reverse previous action
+
+                    deactivatePixelCoordinate(gridX, gridY);
+                }
+            }
+        }
+    }
+
+    private void deactivatePixelCoordinate(int gridX, int gridY) {
+        PixelCoordinate coord = new PixelCoordinate(gridX, gridY);
+
+        // Remove the coordinate from the active set
+        activePixelCoordinates.remove(coord);
+    }
+
 
     private void addSymmetricPointsFiltered(int x, int y, int a, int b, int okamzitaVychylkaValue) {
         // Perform early filtering: Add points only if at least one symmetric point is within the rectangle
@@ -577,9 +657,7 @@ public class SoundWave extends Circle {
         }
     }
 
-    /**
-     * Checks if any of the 8 symmetric points for (x, y) are inside the rectangle.
-     */
+
     private boolean isAnySymmetricPointInRectangle(int x, int y, int a, int b) {
         return isInRectangle(a + x, b + y) ||
                 isInRectangle(a - x, b + y) ||
@@ -591,23 +669,62 @@ public class SoundWave extends Circle {
                 isInRectangle(a - y, b - x);
     }
 
+
+    private boolean innerCircleIsCreated = false;
+
     /**
      * Grows the wave's radius by a fixed amount (can be dynamic based on time).
      */
     public void grow() {
 
-        currentRadius += 1;  // Example growth logic (adjust increment as needed)
-        this.setRadius(currentRadius);
+        outerRadius += 1;  // Example growth logic (adjust increment as needed)
 
-        generateCircleUsingBresenhamsFiltered();
+        this.setRadius(outerRadius);
+
+        // If the outer radius exceeds deltaR, update the inner circle's radius
+        if (outerRadius > deltaR) {
+            if (!innerCircleIsCreated) {
+                innerRadius = outerRadius - deltaR;
+                createInnerCircle(x, y, innerRadius);
+                innerCircleIsCreated = true;
+                System.out.println("inner circle created");
+            }else{
+                innerRadius += 1;
+                innerCircle.setRadius(innerRadius);
+            }
+        }
+
+        generateOuterCircleUsingBresenhamsFiltered();
+
+        // Generate or remove the inner circle pixels dynamically
+        if (innerCircleIsCreated) {
+            generateInnerCircleUsingBresenhamsFiltered();
+        }
+
         //simulateTick();
         // Log duplicate data
         //logDuplicatePixels();
     }
 
+
+
+    private void activatePixelCoordinate(int gridX, int gridY) {
+        PixelCoordinate coord = new PixelCoordinate(gridX, gridY);
+
+        // Add the coordinate to the active set
+        activePixelCoordinates.add(coord);
+    }
+
+
+
+
+
+
+
     /**
      * Logs duplicate pixels detected during circle generation.
      */
+    /*
     public void logDuplicatePixels() {
         if (!duplicatePixels.isEmpty()) {
             System.out.println("Duplicate Pixels Detected:");
@@ -619,7 +736,7 @@ public class SoundWave extends Circle {
             System.out.println("No duplicate pixels detected.");
         }
     }
-
+*/
 
 
 }

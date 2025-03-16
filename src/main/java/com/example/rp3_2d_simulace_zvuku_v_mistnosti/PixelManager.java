@@ -13,7 +13,10 @@ public class PixelManager {
     private int width;  // Width of the room
     private int height; // Height of the room
     private BaseRoomControllerInterface roomController;
-    private static final double PIXELSIZE = 2;
+    private static final double PIXELSIZE = 3;
+
+    //nezapomen zmenit periodu i v soundWave
+    public int perioda = 3;
 
     public PixelManager(BaseRoomControllerInterface roomController) {
         this.roomController = roomController;
@@ -56,6 +59,7 @@ public class PixelManager {
                 // Create a new pixel and add it to the grid
                 pixelGrid[x][y] = new Pixel(x, y, realX, realY);
                 pixelGrid[x][y].setPixelSize(PIXELSIZE);
+                pixelGrid[x][y].setPeriode(perioda);
             }
         }
 

@@ -10,7 +10,7 @@ import java.time.Duration;
  * and the ability to be lit with a specified color.
  */
 public class Pixel extends Rectangle {
-    private static final int PERIODA = 1;
+    private static int PERIODA;
     private int gridX;       // The x-coordinate in the grid
     private int gridY;       // The y-coordinate in the grid
     private double realX;    // The real-world x-coordinate on the scene
@@ -23,6 +23,10 @@ public class Pixel extends Rectangle {
 
     public void setPixelSize(double pixelSize) {
         this.PIXELSIZE = pixelSize;
+    }
+
+    public void setPeriode(int periode) {
+        this.PERIODA = periode;
     }
 
     // Constructor for the pixel
