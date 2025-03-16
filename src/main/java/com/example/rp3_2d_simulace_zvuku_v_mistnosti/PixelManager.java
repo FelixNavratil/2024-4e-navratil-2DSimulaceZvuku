@@ -13,7 +13,7 @@ public class PixelManager {
     private int width;  // Width of the room
     private int height; // Height of the room
     private BaseRoomControllerInterface roomController;
-    private static final double PIXELSIZE = 4;
+    private static final double PIXELSIZE = 2;
 
     public PixelManager(BaseRoomControllerInterface roomController) {
         this.roomController = roomController;

@@ -376,7 +376,9 @@ public class Room1Controller implements BaseRoomControllerInterface {
             waveTimeline.setCycleCount(Timeline.INDEFINITE); // Run forever
             waveTimeline.play(); // Start the timeline
         }
+    }
 
-
+    public Pixel[][] getPixelGrid(){
+        return pixelManager.getPixelGrid();
     }
 }

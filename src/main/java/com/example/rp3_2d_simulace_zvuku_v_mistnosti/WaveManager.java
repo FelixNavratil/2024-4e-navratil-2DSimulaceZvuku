@@ -57,17 +57,24 @@ public class WaveManager {
 
             if (wave.isOlderThan(7000)) {
                 wavesToRemove.add(wave);
-                if (centerPane != null) {
-                    centerPane.getChildren().remove(wave);
-                }
+
             }else if(wave.getAmplitude() <=0 ){
                 wavesToRemove.add(wave);
-                if (centerPane != null) {
-                    centerPane.getChildren().remove(wave);
-                }
+
 
             }
         }
+/*
+        // Iterate over the entire pixelGrid and reset outdated pixels to default
+        Pixel[][] pixelGrid = controller.getPixelGrid(); // Assuming getPixelGrid() gives the grid
+        for (int i = 0; i < pixelGrid.length; i++) {
+            for (int j = 0; j < pixelGrid[i].length; j++) {
+                Pixel pixel = pixelGrid[i][j];
+                if (pixel.hasTimeElapsed()) {
+                    pixel.setDefault(); // Reset pixel to its default state
+                }
+            }
+        }*/
         //checkWavesForCorners(controller);
         checkWavesForReflections(controller);
         activeWaves.removeAll(wavesToRemove);

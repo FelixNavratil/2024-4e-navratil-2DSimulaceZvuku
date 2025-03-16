@@ -462,4 +462,8 @@ public class Room0Controller implements BaseRoomControllerInterface {
             waveTimeline.play(); // Start the timeline
         }
     }
+
+    public Pixel[][] getPixelGrid(){
+        return pixelManager.getPixelGrid();
+    }
 }

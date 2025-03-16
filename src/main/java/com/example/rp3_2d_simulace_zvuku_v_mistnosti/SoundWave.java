@@ -73,7 +73,7 @@ public class SoundWave extends Circle {
         return amplitude;
     }
 
-    private final int PERIODA = 1;
+    private final int PERIODA = 4;
     private int okamzitaVychylka;
 
     // New field to control the direction (1 for normal, -1 for opposite/progressing backwards)
@@ -453,6 +453,42 @@ public class SoundWave extends Circle {
     // Use a Set to track pixels added
     private final Set<PixelCoordinate> visitedPixels = new HashSet<>();
     private final Set<PixelCoordinate> duplicatePixels = new HashSet<>(); // To store duplicates for debugging
+    private final Set<PixelCoordinate> activePixelCoordinates = new HashSet<>(); // Track coordinates of active pixels
+
+
+    /**
+     * Updates active pixels by resetting outdated ones to default.
+     * This method ensures only outdated pixels are processed.
+     */
+    public void updateActivePixels() {
+        // Use an iterator to safely modify the set while iterating
+        Iterator<PixelCoordinate> iterator = activePixelCoordinates.iterator();
+
+        while (iterator.hasNext()) {
+            PixelCoordinate coord = iterator.next();
+
+            // Access the pixel from the grid using the coordinates
+            Pixel pixel = pixelGrid[coord.getX()][coord.getY()];
+
+            if (pixel.hasTimeElapsed()) {
+                pixel.setDefault(); // Reset pixel to its default state
+                iterator.remove();  // Remove the coordinate from activePixelCoordinates
+            }
+        }
+    }
+
+    /**
+     * Adds a pixel coordinate to the set of active pixels.
+     *
+     * @param gridX The x-coordinate in the grid.
+     * @param gridY The y-coordinate in the grid.
+     */
+    private void activatePixelCoordinate(int gridX, int gridY) {
+        PixelCoordinate coord = new PixelCoordinate(gridX, gridY);
+
+        // Add the coordinate to the active set
+        activePixelCoordinates.add(coord);
+    }
 
     /**
      * Adds a point to the map if it lies within the allowed rectangle.
@@ -479,11 +515,22 @@ public class SoundWave extends Circle {
                 } else {
                     visitedPixels.add(pixelCoord);  // Add to the set of visited pixels
                     pixelGrid[gridX][gridY].addVychylka(okamzitaVychylkaValue);
+                    // Activate pixel for periodic checks
+                    activatePixelCoordinate(gridX, gridY);
                 }
 
             }
 
         }
+    }
+
+    /**
+     * Simulates periodic updates of pixels.
+     * This method is called periodically (e.g., in a game loop or simulation tick).
+     */
+    public void simulateTick() {
+        // Update only active pixels
+        updateActivePixels();
     }
 
     public void generateCircleUsingBresenhamsFiltered() {
@@ -553,7 +600,7 @@ public class SoundWave extends Circle {
         this.setRadius(currentRadius);
 
         generateCircleUsingBresenhamsFiltered();
-
+        //simulateTick();
         // Log duplicate data
         //logDuplicatePixels();
     }

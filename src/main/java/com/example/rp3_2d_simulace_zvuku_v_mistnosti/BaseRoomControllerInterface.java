@@ -19,5 +19,5 @@ public interface BaseRoomControllerInterface {
     public List<Line> getRoomWalls();
     List<Point> getRoomCorners();
     public int getStroke();
-
+    public Pixel[][] getPixelGrid();
 }
