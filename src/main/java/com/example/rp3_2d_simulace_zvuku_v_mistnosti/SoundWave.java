@@ -17,6 +17,8 @@ public class SoundWave extends Circle {
     private int innerRadius = 0;      // Inner circle radius (calculated as currentRadius - deltaR)
 
     private Circle innerCircle; // Circle object to represent the inner boundary (when it appears)
+    private boolean innerCircleIsCreated = false;
+
 
     private int amplitude;
     PixelManager pixelManager;
@@ -564,9 +566,7 @@ public class SoundWave extends Circle {
             addSymmetricPointsFiltered(x, y, a, b, okamzitaVychylkaValue);
         }
     }
-    /**
-     * Generates and removes pixels for the inner circle using Bresenham's Algorithm.
-     */
+
     public void generateInnerCircleUsingBresenhamsFiltered() {
         int a = (int) this.x; // Circle center X-coordinate
         int b = (int) this.y; // Circle center Y-coordinate
@@ -596,9 +596,7 @@ public class SoundWave extends Circle {
         }
     }
 
-    /**
-     * Handles adding and clearing pixels for the new inner circle points.
-     */
+
     private void addSymmetricPointsFilteredInner(int x, int y, int a, int b, int okamzitaVychylkaValue) {
         if (isAnySymmetricPointInRectangle(x, y, a, b)) {
             removePointFromMapIfInRectangle(a + x, b + y, okamzitaVychylkaValue); // Quadrant 1
@@ -612,9 +610,7 @@ public class SoundWave extends Circle {
         }
     }
 
-    /**
-     * Removes a pixel from the map if it is within the rectangle (used for shrinking or clearing).
-     */
+
     private void removePointFromMapIfInRectangle(int x, int y, int okamzitaVychylkaValue) {
         if (x >= xMin && x <= xMax && y >= yMin && y <= yMax) {
             int gridX = Pixel.getGridX(x, controller.getXMin());
@@ -670,11 +666,8 @@ public class SoundWave extends Circle {
     }
 
 
-    private boolean innerCircleIsCreated = false;
 
-    /**
-     * Grows the wave's radius by a fixed amount (can be dynamic based on time).
-     */
+
     public void grow() {
 
         outerRadius += 1;  // Example growth logic (adjust increment as needed)
