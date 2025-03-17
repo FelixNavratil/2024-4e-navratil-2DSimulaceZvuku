@@ -1,5 +1,6 @@
 package com.example.rp3_2d_simulace_zvuku_v_mistnosti;
 
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 
@@ -13,7 +14,7 @@ public class SoundWave extends Circle {
     private double x;          // Starting X position
     private double y;          // Starting Y position
     private int outerRadius;   // The current radius of the wave
-    private final int deltaR = 50;   // Fixed difference between radii (donut thickness)
+    private final int deltaR = 60;   // Fixed difference between radii (donut thickness)
     private int innerRadius = 0;      // Inner circle radius (calculated as currentRadius - deltaR)
 
     private Circle innerCircle; // Circle object to represent the inner boundary (when it appears)
@@ -494,6 +495,33 @@ public class SoundWave extends Circle {
     }
 
 
+    public void grow() {
+// Increment the outer radius
+        outerRadius += 1;  // Example growth increment
+
+        this.setRadius(outerRadius);
+
+        // Handle inner circle creation and growth
+        if (outerRadius > deltaR) {
+            if (!innerCircleIsCreated) {
+                // Create inner circle when threshold is met
+                innerRadius = outerRadius - deltaR;
+                createInnerCircle(x, y, innerRadius);
+                innerCircleIsCreated = true;
+            } else {
+                // Grow inner circle incrementally as outer radius grows
+                innerRadius += 1;
+                innerCircle.setRadius(innerRadius);
+            }
+        }
+
+        // Generate the donut wave dynamically
+        generateDonutWithOkamzitaVychylka();
+
+        // Reset visited and duplicate pixel sets for recalculating transitions
+        resetVisitedPixels();
+    }
+
 
 
     // Use a Set to track pixels added
@@ -505,9 +533,227 @@ public class SoundWave extends Circle {
         return activePixelCoordinates;
     }
 
+    /**
+     * Generates concentric circles for the sound wave and updates the `okamzitaVychylka`
+     * for every pixel in the donut (between innerRadius and outerRadius).
+     */
+    public void generateDonutWithOkamzitaVychylka() {
+        // Calculate the wave width
+        int waveWidth = outerRadius - innerRadius;
+
+        // Pixel granularity for the wave
+        int pixelSize = (int) pixelManager.getPixelSize();
+
+        if (waveWidth > pixelSize) {
+            int numberOfCircles = waveWidth / pixelSize;
+
+            // Divide the circles into four equal segments
+            int segmentSize = numberOfCircles / 4;
+
+            //System.out.println("Wave Width: " + waveWidth);
+            //System.out.println("Pixel Size: " + pixelSize);
+            //System.out.println("Number of Circles: " + numberOfCircles);
+            //System.out.println("Segment Size: " + segmentSize);
+
+            // Increment for amplitude change in each segment
+            int amplitudeIncrement = amplitude / segmentSize;
+
+            // Iterate for all concentric circles (outer to inner)
+            for (int i = 0; i < numberOfCircles; i++) {
+                // Calculate the radius for the current circle
+                int radius = innerRadius + ((numberOfCircles - i - 1) * pixelSize);
+
+                // Determine instantaneous displacement
+                double amplitudeForCircle = calculateAmplitudeForCircle(i, segmentSize, amplitudeIncrement);
+
+                // Number circles, outermost is "1"
+                int circleNumber = i + 1;
+
+                // Debug output
+                //System.out.println("Circle Number: " + circleNumber + ", Radius: " + radius);
+
+                // Draw the circle and update pixels
+                drawCircleWithOkamzitaVychylka((int) x, (int) y, radius, (int) amplitudeForCircle);
+            }
+        }
+
+        // Output separator
+        //System.out.println("----------------------------------------------");
+    }
+
+    /**
+     * Resets the sets tracking visited and duplicate pixels for the next update.
+     */
+    public void resetVisitedPixels() {
+        visitedPixels.clear();
+        duplicatePixels.clear();
+        activePixelCoordinates.clear(); // Reset active pixels as well
+    }
+
+    /**
+     * Determines the amplitude (okamzitaVychylka) for the given circle index
+     * based on its position in the wave cycle.
+     */
+    private double calculateAmplitudeForCircle(int circleIndex, int segmentSize, int amplitudeIncrement) {
+        if (circleIndex < segmentSize) {
+            //System.out.println("Circle Index: " + circleIndex + ", Amplitude Increment: " + amplitudeIncrement);
+            // First segment: Increase from 0 to maximum amplitude
+            return +amplitudeIncrement;
+        } else if (circleIndex < 2 * segmentSize) {
+            //System.out.println("Circle Index: " + circleIndex + ", Amplitude Increment: " + amplitudeIncrement);
+            // Second segment: Decrease from maximum amplitude back to 0
+            return -amplitudeIncrement;
+        } else if (circleIndex < 3 * segmentSize) {
+            //System.out.println("Circle Index: " + circleIndex + ", Amplitude Increment: " + amplitudeIncrement);
+            // Third segment: Decrease from 0 to maximum negative amplitude
+            return -amplitudeIncrement;
+        } else {
+            //System.out.println("Circle Index: " + circleIndex + ", Amplitude Increment: " + amplitudeIncrement);
+            // Fourth segment: Increase from maximum negative amplitude back to 0
+            return +amplitudeIncrement;
+        }
+    }
+
+    /**
+     * Draws a circle using Bresenham's algorithm and adds `okamzitaVychylka` to each pixel.
+     */
+    private void drawCircleWithOkamzitaVychylka(int centerX, int centerY, int radius, int okamzitaVychylkaValue) {
+        int x = 0;
+        int y = radius;
+        int d = 3 - 2 * radius;
+
+        // Set initial circle pixels
+        setCirclePixelsDisplacement(centerX, centerY, x, y, okamzitaVychylkaValue);
+        while (y >= x) {
+            x++;
+            if (d > 0) {
+                y--;
+                d = d + 4 * (x - y) + 10;
+            } else {
+                d = d + 4 * x + 6;
+            }
+
+            // Set the pixels for this circle
+            setCirclePixelsDisplacement(centerX, centerY, x, y, okamzitaVychylkaValue);
+        }
+    }
+
+
+    /**
+     * Sets the instantaneous displacement (`okamzitaVychylka`) for all eight symmetric octants of a circle.
+     */
+    private void setCirclePixelsDisplacement(int centerX, int centerY, int x, int y, int okamzitaVychylkaValue) {
+
+        if (centerY + y > yMin && centerY + y < yMax && centerX + x > xMin && centerX + x < xMax) {
+            setPixelDisplacement(centerX + x, centerY + y, okamzitaVychylkaValue);
+        }
+        if (centerY + y > yMin && centerY + y < yMax && centerX - x > xMin && centerX - x < xMax) {
+            setPixelDisplacement(centerX - x, centerY + y, okamzitaVychylkaValue);
+        }
+        if (centerY - y > yMin && centerY - y < yMax && centerX + x > xMin && centerX + x < xMax) {
+            setPixelDisplacement(centerX + x, centerY - y, okamzitaVychylkaValue);
+        }
+        if (centerY - y > yMin && centerY - y < yMax && centerX - x > xMin && centerX - x < xMax) {
+            setPixelDisplacement(centerX - x, centerY - y, okamzitaVychylkaValue);
+        }
+        if (centerY + x > yMin && centerY + x < yMax && centerX + y > xMin && centerX + y < xMax) {
+            setPixelDisplacement(centerX + y, centerY + x, okamzitaVychylkaValue);
+        }
+        if (centerY + x > yMin && centerY + x < yMax && centerX - y > xMin && centerX - y < xMax) {
+            setPixelDisplacement(centerX - y, centerY + x, okamzitaVychylkaValue);
+        }
+        if (centerY - x > yMin && centerY - x < yMax && centerX + y > xMin && centerX + y < xMax) {
+            setPixelDisplacement(centerX + y, centerY - x, okamzitaVychylkaValue);
+        }
+        if (centerY - x > yMin && centerY - x < yMax && centerX - y > xMin && centerX - y < xMax) {
+            setPixelDisplacement(centerX - y, centerY - x, okamzitaVychylkaValue);
+        }
+    }
+
+
+    /**
+     * Adds the `okamzitaVychylka` displacement to the specified pixel, ensuring boundary constraints are respected
+     * and avoiding duplicate updates using `visitedPixels`.
+     */
+    private void setPixelDisplacement(int x, int y, int okamzitaVychylkaValue) {
+        // Check if the pixel is within the grid boundaries
+        //if (x >= xMin && x <= xMax && y >= yMin && y <= yMax) {
+            int gridX = Pixel.getGridX(x, controller.getXMin());
+            int gridY = Pixel.getGridY(y, controller.getYMin());
+
+            if (gridX >= 0 && gridX < pixelGrid.length && gridY >= 0 && gridY < pixelGrid[0].length) {
+                // Create a PixelCoordinate object
+                PixelCoordinate pixelCoord = new PixelCoordinate(gridX, gridY);
+
+                if (visitedPixels.contains(pixelCoord)) {
+                    // If already visited, log as a duplicate
+                    duplicatePixels.add(pixelCoord);
+                } else {
+                    // Mark pixel as visited and update its displacement
+                    visitedPixels.add(pixelCoord);
+                    pixelGrid[gridX][gridY].addVychylka(okamzitaVychylkaValue);
+
+                    // Activate pixel for periodic checks
+                    activatePixelCoordinate(gridX, gridY);
+                }
+            }
+        //}
+    }
+
+    public void addCirclesToPane(Pane pane) {
+        pane.getChildren().addAll(this, innerCircle);
+    }
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
 
     private void addPointToMapIfInRectangle(int x, int y, int okamzitaVychylkaValue) {
         // Check if the point is within the specified rectangle
@@ -666,40 +912,9 @@ public class SoundWave extends Circle {
     }
 
 
+*/
 
 
-    public void grow() {
-
-        outerRadius += 1;  // Example growth logic (adjust increment as needed)
-
-        this.setRadius(outerRadius);
-
-        // If the outer radius exceeds deltaR, update the inner circle's radius
-        if (outerRadius > deltaR) {
-            if (!innerCircleIsCreated) {
-                innerRadius = outerRadius - deltaR;
-                createInnerCircle(x, y, innerRadius);
-                innerCircleIsCreated = true;
-                
-            }else{
-                innerRadius += 1;
-                innerCircle.setRadius(innerRadius);
-            }
-        }
-
-
-
-        generateOuterCircleUsingBresenhamsFiltered();
-
-        // Generate or remove the inner circle pixels dynamically
-        if (innerCircleIsCreated) {
-            generateInnerCircleUsingBresenhamsFiltered();
-        }
-
-        //simulateTick();
-        // Log duplicate data
-        //logDuplicatePixels();
-    }
 
 
 
@@ -714,6 +929,7 @@ public class SoundWave extends Circle {
     /**
      * Subtracts the contribution of this inner circle from the pixel map.
      */
+    /*
     private void subtractVychylkaIfInRectangle(int x, int y, int okamzitaVychylkaValue) {
         // Check if the pixel is within the grid bounds
         if (x >= xMin && x <= xMax && y >= yMin && y <= yMax) {
@@ -732,9 +948,9 @@ public class SoundWave extends Circle {
         }
     }
 
-    /**
-     * Subtracts the okamzitaVychylka contribution of the **inner circle** from the overlapping pixels.
-     */
+    /*
+      Subtracts the okamzitaVychylka contribution of the **inner circle** from the overlapping pixels.
+
     private void subtractSymmetricPointsFilteredInner(int x, int y, int a, int b, int okamzitaVychylkaValue) {
         if (isAnySymmetricPointInRectangle(x, y, a, b)) {
             // Subtract only at points within the active rectangle
@@ -748,7 +964,7 @@ public class SoundWave extends Circle {
             subtractVychylkaIfInRectangle(a - y, b - x, okamzitaVychylkaValue); // Transposed 4
         }
     }
-
+*/
 
 
     /**
@@ -772,44 +988,14 @@ public class SoundWave extends Circle {
      * Generate the donut shape between the outer and inner circles
      * and apply sinusoidal behavior for okamzitaVychylka at each pixel.
      */
-    public void generateDonut() {
-        int centerX = (int) this.x; // Center of the wave
-        int centerY = (int) this.y;
 
-        // Calculate the squared values for efficiency
-        int rOuterSquared = this.outerRadius * this.outerRadius; // Outer circle squared radius
-        int rInnerSquared = this.innerRadius * this.innerRadius; // Inner circle squared radius
-
-        int donutWidth = this.outerRadius - this.innerRadius; // Thickness of the donut
-
-        // Iterate over a square bounding area of the outer circle
-        for (int x = -outerRadius; x <= outerRadius; x++) {
-            for (int y = -outerRadius; y <= outerRadius; y++) {
-                int distanceSquared = x * x + y * y;
-
-                // If pixel is within the donut region
-                if (distanceSquared <= rOuterSquared && distanceSquared >= rInnerSquared) {
-                    // Compute absolute distance from the outer radius
-                    double distanceFromOuter = Math.sqrt(distanceSquared) - this.innerRadius;
-
-                    // Calculate relative distance: fraction within donut (0.0 to 1.0)
-                    double relativeDistance = distanceFromOuter / donutWidth;
-
-                    // Calculate okamzitaVychylka using sinusoidal behavior
-                    int okamzitaVychylka = (int) (100 * Math.sin(2 * Math.PI * relativeDistance));
-
-                    // Invoke pixel coloring based on sinusoidal okamzitaVychylka
-                    setPixelColor(centerX + x, centerY + y, okamzitaVychylka);
-                }
-            }
-        }
-    }
 
     /**
      * Sets the color of a pixel in the grid based on okamzitaVychylka.
      * Maps -100 to 100 range to a color scale (blue for negative, red for positive,
      * and white for neutral (0)).
      */
+    /*
     private void setPixelColor(int x, int y, int okamzitaVychylka) {
         // Ensure pixel is within the grid boundary
         if (x >= xMin && x <= xMax && y >= yMin && y <= yMax) {
@@ -821,4 +1007,6 @@ public class SoundWave extends Circle {
             }
         }
     }
+    */
+
 }

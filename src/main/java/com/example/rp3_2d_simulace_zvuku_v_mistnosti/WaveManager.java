@@ -60,7 +60,7 @@ public class WaveManager {
 
                 }else{
                     if (!centerPane.getChildren().contains(wave.getInnerCircle())){
-                        //centerPane.getChildren().add(wave.getInnerCircle());
+                        //wave.addCirclesToPane( centerPane);
                     }
                 }
             }
