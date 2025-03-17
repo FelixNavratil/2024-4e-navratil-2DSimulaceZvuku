@@ -60,4 +60,18 @@ public class Calculator {
         // Return the symmetric point
         return new Point(x_sym, y_sym);
     }
+
+
+    /**
+     * Calculate the distance between two points given their coordinates as integers.
+     *
+     * @param x1 x-coordinate of the first point
+     * @param y1 y-coordinate of the first point
+     * @param x2 x-coordinate of the second point
+     * @param y2 y-coordinate of the second point
+     * @return The distance between the two points as a double
+     */
+    public double calculateDistance(int x1, int y1, int x2, int y2) {
+        return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+    }
 }

@@ -30,4 +30,10 @@ public class PixelCoordinate {
         return 31 * x + y;
     }
 
+    public double calculateDistanceSquaredFromCenter(int centerX, int centerY) {
+        int dx = x - centerX;
+        int dy = y - centerY;
+        return (double) (dx * dx + dy * dy);
+    }
+
 }

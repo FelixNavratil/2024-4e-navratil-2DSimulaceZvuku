@@ -13,7 +13,7 @@ public class PixelManager {
     private int width;  // Width of the room
     private int height; // Height of the room
     private BaseRoomControllerInterface roomController;
-    private static final double PIXELSIZE = 3;
+    private static final int PIXELSIZE = 3;
 
     //nezapomen zmenit periodu i v soundWave
     public int perioda = 3;
@@ -130,7 +130,7 @@ public class PixelManager {
     }
 
 
-    public double getPixelSize(){
+    public int getPixelSize(){
         return PIXELSIZE;
     }
 

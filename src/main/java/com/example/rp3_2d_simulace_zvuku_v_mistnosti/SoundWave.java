@@ -28,6 +28,7 @@ public class SoundWave extends Circle {
 
     //nezapomen zmenit periodu i v soundWave
     public  int PERIODA = 3;
+    private int PIXELSIZE = 3;
     private int okamzitaVychylka;
 
     /**
@@ -541,44 +542,30 @@ public class SoundWave extends Circle {
         // Calculate the wave width
         int waveWidth = outerRadius - innerRadius;
 
-        // Pixel granularity for the wave
-        int pixelSize = (int) pixelManager.getPixelSize();
+        // Calculate the number of circles
+        int numberOfCircles = waveWidth / PIXELSIZE;
 
-        if (waveWidth > pixelSize) {
-            int numberOfCircles = waveWidth / pixelSize;
+        // Determine how many segments currently exist (1 to 4)
+        int existingSegments = Math.max(1, Math.min(4, (outerRadius * 4) / deltaR));
+        // Force at least 1 segment to exist for gradual circle addition
 
-            // Divide the circles into four equal segments
-            int segmentSize = numberOfCircles / 4;
+        // Divide the circles into the currently existing segments
+        int segmentSize = existingSegments > 1 ? numberOfCircles / existingSegments : numberOfCircles;
 
-            //System.out.println("Wave Width: " + waveWidth);
-            //System.out.println("Pixel Size: " + pixelSize);
-            //System.out.println("Number of Circles: " + numberOfCircles);
-            //System.out.println("Segment Size: " + segmentSize);
+        // Increment for amplitude change in each segment
+        int amplitudeIncrement = existingSegments > 1 ? amplitude / existingSegments : amplitude;
 
-            // Increment for amplitude change in each segment
-            int amplitudeIncrement = amplitude / segmentSize;
+        // Iterate for all concentric circles (outer to inner)
+        for (int i = 0; i < numberOfCircles; i++) {
+            // Calculate the radius for the current circle
+            int radius = innerRadius + ((numberOfCircles - i - 1) * PIXELSIZE);
 
-            // Iterate for all concentric circles (outer to inner)
-            for (int i = 0; i < numberOfCircles; i++) {
-                // Calculate the radius for the current circle
-                int radius = innerRadius + ((numberOfCircles - i - 1) * pixelSize);
+            // Determine instantaneous displacement
+            double amplitudeForCircle = calculateAmplitudeForCircle(i, segmentSize, amplitudeIncrement);
 
-                // Determine instantaneous displacement
-                double amplitudeForCircle = calculateAmplitudeForCircle(i, segmentSize, amplitudeIncrement);
-
-                // Number circles, outermost is "1"
-                int circleNumber = i + 1;
-
-                // Debug output
-                //System.out.println("Circle Number: " + circleNumber + ", Radius: " + radius);
-
-                // Draw the circle and update pixels
-                drawCircleWithOkamzitaVychylka((int) x, (int) y, radius, (int) amplitudeForCircle);
-            }
+            // Draw the circle and update pixels
+            drawCircleWithOkamzitaVychylka((int) x, (int) y, radius, (int) amplitudeForCircle);
         }
-
-        // Output separator
-        //System.out.println("----------------------------------------------");
     }
 
     /**
@@ -689,11 +676,11 @@ public class SoundWave extends Circle {
                     // If already visited, log as a duplicate
                     duplicatePixels.add(pixelCoord);
                 } else {
-                    // Mark pixel as visited and update its displacement
                     visitedPixels.add(pixelCoord);
+                    activePixelCoordinates.add(pixelCoord); // Mark as active
                     pixelGrid[gridX][gridY].addVychylka(okamzitaVychylkaValue);
 
-                    // Activate pixel for periodic checks
+
                     activatePixelCoordinate(gridX, gridY);
                 }
             }
@@ -703,6 +690,8 @@ public class SoundWave extends Circle {
     public void addCirclesToPane(Pane pane) {
         pane.getChildren().addAll(this, innerCircle);
     }
+
+
 
 
 

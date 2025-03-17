@@ -18,11 +18,11 @@ public class Pixel extends Rectangle {
     private double realY;    // The real-world y-coordinate on the scene
     private int celkovaVychylka;
     private Rectangle rectangle;   // The visual representation of the pixel as a rectangle
-    private static double PIXELSIZE;
+    private static int PIXELSIZE;
 
     private LocalDateTime lastUpdatedTime; // To track when the pixel's color was last explicitly updated
 
-    public void setPixelSize(double pixelSize) {
+    public void setPixelSize(int pixelSize) {
         this.PIXELSIZE = pixelSize;
     }
 

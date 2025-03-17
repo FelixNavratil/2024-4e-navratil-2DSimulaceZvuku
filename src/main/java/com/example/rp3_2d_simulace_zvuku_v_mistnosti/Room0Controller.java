@@ -430,7 +430,7 @@ public class Room0Controller implements BaseRoomControllerInterface {
         // Check if the click was inside the rectangle using the built-in contains() method
         if (rectangle.contains(x, y)) {
             // Save the coordinates if the click was on the rectangle
-            waveManager.createWave(x,y,this, 0,0,100,1);
+            waveManager.createWave(x,y,this, pixelManager.getPixelSize(),0,100,1);
 
 
             if (!isRunning && !buttonReset.isDisabled()){
