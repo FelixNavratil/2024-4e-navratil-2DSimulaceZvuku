@@ -1,5 +1,6 @@
 package com.example.rp3_2d_simulace_zvuku_v_mistnosti;
 
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.paint.Color;
 import java.time.LocalDateTime;
@@ -152,6 +153,10 @@ public class Pixel extends Rectangle {
             return -1; // The pixel has never been explicitly updated
         }
         return Duration.between(lastUpdatedTime, LocalDateTime.now()).toMillis();
+    }
+
+    public void setColor(Paint color) {
+        this.setFill(color);
     }
 
     /**

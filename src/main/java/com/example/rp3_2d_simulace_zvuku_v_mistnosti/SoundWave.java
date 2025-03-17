@@ -524,7 +524,7 @@ public class SoundWave extends Circle {
                     duplicatePixels.add(pixelCoord); // Log duplicate pixel
                 } else {
                     visitedPixels.add(pixelCoord);  // Add to the set of visited pixels
-                    pixelGrid[gridX][gridY].addVychylka(okamzitaVychylkaValue);
+                    pixelGrid[gridX][gridY].addVychylka(50);
 
                     // Activate pixel for periodic checks
                     activatePixelCoordinate(gridX, gridY);
@@ -627,7 +627,7 @@ public class SoundWave extends Circle {
                 if (visitedPixels.contains(pixelCoord)) {
                     visitedPixels.remove(pixelCoord); // Stop tracking this pixel
                     duplicatePixels.remove(pixelCoord); // Remove from duplicate list
-                    pixelGrid[gridX][gridY].setDefault(); // Reverse previous action
+                    pixelGrid[gridX][gridY].addVychylka(-50); // Reverse previous action
 
                     deactivatePixelCoordinate(gridX, gridY);
                 }
@@ -687,12 +687,14 @@ public class SoundWave extends Circle {
                 innerRadius = outerRadius - deltaR;
                 createInnerCircle(x, y, innerRadius);
                 innerCircleIsCreated = true;
-                System.out.println("inner circle created");
+                
             }else{
                 innerRadius += 1;
                 innerCircle.setRadius(innerRadius);
             }
         }
+
+
 
         generateOuterCircleUsingBresenhamsFiltered();
 
@@ -716,8 +718,43 @@ public class SoundWave extends Circle {
     }
 
 
+    /**
+     * Subtracts the contribution of this inner circle from the pixel map.
+     */
+    private void subtractVychylkaIfInRectangle(int x, int y, int okamzitaVychylkaValue) {
+        // Check if the pixel is within the grid bounds
+        if (x >= xMin && x <= xMax && y >= yMin && y <= yMax) {
+            int gridX = Pixel.getGridX(x, controller.getXMin());
+            int gridY = Pixel.getGridY(y, controller.getYMin());
 
+            // Ensure the grid indices are within bounds
+            if (gridX >= 0 && gridX < pixelGrid.length && gridY >= 0 && gridY < pixelGrid[0].length) {
+                // Subtract the okamzitaVychylka value from the pixel
+                pixelGrid[gridX][gridY].addVychylka(-okamzitaVychylkaValue);
 
+                // Optionally deactivate the pixel (if no contributions remain)
+                deactivatePixelCoordinate(gridX, gridY);
+
+            }
+        }
+    }
+
+    /**
+     * Subtracts the okamzitaVychylka contribution of the **inner circle** from the overlapping pixels.
+     */
+    private void subtractSymmetricPointsFilteredInner(int x, int y, int a, int b, int okamzitaVychylkaValue) {
+        if (isAnySymmetricPointInRectangle(x, y, a, b)) {
+            // Subtract only at points within the active rectangle
+            subtractVychylkaIfInRectangle(a + x, b + y, okamzitaVychylkaValue); // Quadrant 1
+            subtractVychylkaIfInRectangle(a - x, b + y, okamzitaVychylkaValue); // Quadrant 2
+            subtractVychylkaIfInRectangle(a + x, b - y, okamzitaVychylkaValue); // Quadrant 4
+            subtractVychylkaIfInRectangle(a - x, b - y, okamzitaVychylkaValue); // Quadrant 3
+            subtractVychylkaIfInRectangle(a + y, b + x, okamzitaVychylkaValue); // Transposed 1
+            subtractVychylkaIfInRectangle(a - y, b + x, okamzitaVychylkaValue); // Transposed 2
+            subtractVychylkaIfInRectangle(a + y, b - x, okamzitaVychylkaValue); // Transposed 3
+            subtractVychylkaIfInRectangle(a - y, b - x, okamzitaVychylkaValue); // Transposed 4
+        }
+    }
 
 
 
@@ -738,5 +775,57 @@ public class SoundWave extends Circle {
     }
 */
 
+    /**
+     * Generate the donut shape between the outer and inner circles
+     * and apply sinusoidal behavior for okamzitaVychylka at each pixel.
+     */
+    public void generateDonut() {
+        int centerX = (int) this.x; // Center of the wave
+        int centerY = (int) this.y;
 
+        // Calculate the squared values for efficiency
+        int rOuterSquared = this.outerRadius * this.outerRadius; // Outer circle squared radius
+        int rInnerSquared = this.innerRadius * this.innerRadius; // Inner circle squared radius
+
+        int donutWidth = this.outerRadius - this.innerRadius; // Thickness of the donut
+
+        // Iterate over a square bounding area of the outer circle
+        for (int x = -outerRadius; x <= outerRadius; x++) {
+            for (int y = -outerRadius; y <= outerRadius; y++) {
+                int distanceSquared = x * x + y * y;
+
+                // If pixel is within the donut region
+                if (distanceSquared <= rOuterSquared && distanceSquared >= rInnerSquared) {
+                    // Compute absolute distance from the outer radius
+                    double distanceFromOuter = Math.sqrt(distanceSquared) - this.innerRadius;
+
+                    // Calculate relative distance: fraction within donut (0.0 to 1.0)
+                    double relativeDistance = distanceFromOuter / donutWidth;
+
+                    // Calculate okamzitaVychylka using sinusoidal behavior
+                    int okamzitaVychylka = (int) (100 * Math.sin(2 * Math.PI * relativeDistance));
+
+                    // Invoke pixel coloring based on sinusoidal okamzitaVychylka
+                    setPixelColor(centerX + x, centerY + y, okamzitaVychylka);
+                }
+            }
+        }
+    }
+
+    /**
+     * Sets the color of a pixel in the grid based on okamzitaVychylka.
+     * Maps -100 to 100 range to a color scale (blue for negative, red for positive,
+     * and white for neutral (0)).
+     */
+    private void setPixelColor(int x, int y, int okamzitaVychylka) {
+        // Ensure pixel is within the grid boundary
+        if (x >= xMin && x <= xMax && y >= yMin && y <= yMax) {
+            int gridX = Pixel.getGridX(x, controller.getXMin());
+            int gridY = Pixel.getGridY(y, controller.getYMin());
+
+            if (gridX >= 0 && gridX < pixelGrid.length && gridY >= 0 && gridY < pixelGrid[0].length) {
+                pixelGrid[gridX][gridY].addVychylka(okamzitaVychylka);
+            }
+        }
+    }
 }
