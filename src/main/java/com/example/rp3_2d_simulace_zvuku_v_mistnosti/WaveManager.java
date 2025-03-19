@@ -292,7 +292,7 @@ public class WaveManager {
         Point symmetricPoint = new Calculator().calculateSymetricPoint(center, reflectingWall);
         int okamzitaVychylka = checkWavesForAmplitude(wave.getAmplitude(), wave.getokamzitaVychylka());
         if (wave.getAmplitude()-20 >0){
-            createWave(symmetricPoint.getX(), symmetricPoint.getY(), controller, wave.getOuterRadius(), okamzitaVychylka, wave.getAmplitude()-20, -1*wave.getDirection());
+            createWave(symmetricPoint.getX(), symmetricPoint.getY(), controller, wave.getOuterRadius(), okamzitaVychylka, wave.getAmplitude()-50, -1*wave.getDirection());
         }
     }
 
@@ -301,7 +301,7 @@ public class WaveManager {
         Point symmetricPoint = new Calculator().calculateSymetricPoint(center, reflectingWall);
         int novaOkamzitaVychylka = checkWavesForAmplitude(amplituda, okamzitaVychylka);
         if (amplituda-20 >0){
-            createWave(symmetricPoint.getX(), symmetricPoint.getY(), controller, currentRadius, novaOkamzitaVychylka, amplituda-20, -1*direction);
+            createWave(symmetricPoint.getX(), symmetricPoint.getY(), controller, currentRadius, novaOkamzitaVychylka, amplituda-50, -1*direction);
         }
     }
 

@@ -27,7 +27,7 @@ public class SoundWave extends Circle {
     private int xMin, xMax, yMin, yMax;
 
     //nezapomen zmenit periodu i v soundWave
-    public  int PERIODA = 3;
+    public  int PERIODA = 5;
     private int PIXELSIZE = 3;
     private int okamzitaVychylka;
 
@@ -517,12 +517,14 @@ public class SoundWave extends Circle {
         }
 
         // Generate the donut wave dynamically
-        generateDonutWithOkamzitaVychylka();
+        if (outerRadius%PIXELSIZE == 0 && !isPaused){
+            generateDonutWithOkamzitaVychylka();
+        }
+
 
         // Reset visited and duplicate pixel sets for recalculating transitions
         resetVisitedPixels();
     }
-
 
 
     // Use a Set to track pixels added
@@ -534,6 +536,8 @@ public class SoundWave extends Circle {
         return activePixelCoordinates;
     }
 
+    int counter = 0;
+
     /**
      * Generates concentric circles for the sound wave and updates the `okamzitaVychylka`
      * for every pixel in the donut (between innerRadius and outerRadius).
@@ -542,30 +546,42 @@ public class SoundWave extends Circle {
         // Calculate the wave width
         int waveWidth = outerRadius - innerRadius;
 
-        // Calculate the number of circles
+        // Calculate the number of circles in the donut
         int numberOfCircles = waveWidth / PIXELSIZE;
 
-        // Determine how many segments currently exist (1 to 4)
+        // Determine how many segments currently exist (1 to 4 based on outerRadius)
         int existingSegments = Math.max(1, Math.min(4, (outerRadius * 4) / deltaR));
-        // Force at least 1 segment to exist for gradual circle addition
 
-        // Divide the circles into the currently existing segments
-        int segmentSize = existingSegments > 1 ? numberOfCircles / existingSegments : numberOfCircles;
+        // Segment size (number of circles per segment)
+        int segmentSize = Math.max(1, numberOfCircles / existingSegments); // Avoid division by 0
 
-        // Increment for amplitude change in each segment
-        int amplitudeIncrement = existingSegments > 1 ? amplitude / existingSegments : amplitude;
+        // Amplitude increment per circle
+        int amplitudeIncrement = amplitude;
 
-        // Iterate for all concentric circles (outer to inner)
+        // Debugging values
+        System.out.println("Amplitude Increment: " + amplitudeIncrement);
+        System.out.println("Segment Size: " + segmentSize);
+        System.out.println("Number of Circles: " + numberOfCircles);
+        System.out.println("Outer Radius: " + outerRadius);
+        System.out.println(" ");
+
+        // Loop through all the concentric circles in the donut
         for (int i = 0; i < numberOfCircles; i++) {
             // Calculate the radius for the current circle
             int radius = innerRadius + ((numberOfCircles - i - 1) * PIXELSIZE);
 
-            // Determine instantaneous displacement
-            double amplitudeForCircle = calculateAmplitudeForCircle(i, segmentSize, amplitudeIncrement);
+            // Determine amplitude for the current circle
+            int amplitudeForCircle = calculateAmplitudeForCircle(i, segmentSize, amplitudeIncrement);
 
-            // Draw the circle and update pixels
-            drawCircleWithOkamzitaVychylka((int) x, (int) y, radius, (int) amplitudeForCircle);
+            // Debugging output
+            System.out.println("Circle Index: " + i + " | Amplitude: " + amplitudeForCircle);
+
+            // Draw the circle with the calculated instantaneous displacement
+            drawCircleWithOkamzitaVychylka((int) x, (int) y, radius, amplitudeForCircle);
         }
+
+        // End cycle debugging output
+        System.out.println("End of donut generation *************************************************");
     }
 
     /**
@@ -581,23 +597,14 @@ public class SoundWave extends Circle {
      * Determines the amplitude (okamzitaVychylka) for the given circle index
      * based on its position in the wave cycle.
      */
-    private double calculateAmplitudeForCircle(int circleIndex, int segmentSize, int amplitudeIncrement) {
-        if (circleIndex < segmentSize) {
-            //System.out.println("Circle Index: " + circleIndex + ", Amplitude Increment: " + amplitudeIncrement);
-            // First segment: Increase from 0 to maximum amplitude
-            return +amplitudeIncrement;
-        } else if (circleIndex < 2 * segmentSize) {
-            //System.out.println("Circle Index: " + circleIndex + ", Amplitude Increment: " + amplitudeIncrement);
-            // Second segment: Decrease from maximum amplitude back to 0
+    private int calculateAmplitudeForCircle(int circleIndex, int segmentSize, int amplitudeIncrement) {
+
+        if  (circleIndex < 5){
+            return amplitudeIncrement;
+        }else if (circleIndex < 15){
             return -amplitudeIncrement;
-        } else if (circleIndex < 3 * segmentSize) {
-            //System.out.println("Circle Index: " + circleIndex + ", Amplitude Increment: " + amplitudeIncrement);
-            // Third segment: Decrease from 0 to maximum negative amplitude
-            return -amplitudeIncrement;
-        } else {
-            //System.out.println("Circle Index: " + circleIndex + ", Amplitude Increment: " + amplitudeIncrement);
-            // Fourth segment: Increase from maximum negative amplitude back to 0
-            return +amplitudeIncrement;
+        }else{
+            return amplitudeIncrement;
         }
     }
 
@@ -665,245 +672,31 @@ public class SoundWave extends Circle {
     private void setPixelDisplacement(int x, int y, int okamzitaVychylkaValue) {
         // Check if the pixel is within the grid boundaries
         //if (x >= xMin && x <= xMax && y >= yMin && y <= yMax) {
-            int gridX = Pixel.getGridX(x, controller.getXMin());
-            int gridY = Pixel.getGridY(y, controller.getYMin());
+        int gridX = Pixel.getGridX(x, controller.getXMin());
+        int gridY = Pixel.getGridY(y, controller.getYMin());
 
-            if (gridX >= 0 && gridX < pixelGrid.length && gridY >= 0 && gridY < pixelGrid[0].length) {
-                // Create a PixelCoordinate object
-                PixelCoordinate pixelCoord = new PixelCoordinate(gridX, gridY);
+        if (gridX >= 0 && gridX < pixelGrid.length && gridY >= 0 && gridY < pixelGrid[0].length) {
+            // Create a PixelCoordinate object
+            PixelCoordinate pixelCoord = new PixelCoordinate(gridX, gridY);
 
-                if (visitedPixels.contains(pixelCoord)) {
-                    // If already visited, log as a duplicate
-                    duplicatePixels.add(pixelCoord);
-                } else {
-                    visitedPixels.add(pixelCoord);
-                    activePixelCoordinates.add(pixelCoord); // Mark as active
-                    pixelGrid[gridX][gridY].addVychylka(okamzitaVychylkaValue);
+            if (visitedPixels.contains(pixelCoord)) {
+                // If already visited, log as a duplicate
+                duplicatePixels.add(pixelCoord);
+            } else {
+                visitedPixels.add(pixelCoord);
+                activePixelCoordinates.add(pixelCoord); // Mark as active
+                pixelGrid[gridX][gridY].addVychylka(okamzitaVychylkaValue);
 
 
-                    activatePixelCoordinate(gridX, gridY);
-                }
+                activatePixelCoordinate(gridX, gridY);
             }
+        }
         //}
     }
 
     public void addCirclesToPane(Pane pane) {
         pane.getChildren().addAll(this, innerCircle);
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-
-    private void addPointToMapIfInRectangle(int x, int y, int okamzitaVychylkaValue) {
-        // Check if the point is within the specified rectangle
-        if (x >= xMin && x <= xMax && y >= yMin && y <= yMax) {
-            // Calculate the grid coordinates using the static method in Pixel
-
-            int gridX = Pixel.getGridX(x, controller.getXMin());
-            int gridY = Pixel.getGridY(y, controller.getYMin());
-
-            // Validate that the calculated grid indices are within bounds
-            if (gridX >= 0 && gridX < pixelGrid.length && gridY >= 0 && gridY < pixelGrid[0].length) {
-                // Create a PixelCoordinate object
-                PixelCoordinate pixelCoord = new PixelCoordinate(gridX, gridY);
-
-                if (visitedPixels.contains(pixelCoord)) {
-                    duplicatePixels.add(pixelCoord); // Log duplicate pixel
-                } else {
-                    visitedPixels.add(pixelCoord);  // Add to the set of visited pixels
-                    pixelGrid[gridX][gridY].addVychylka(50);
-
-                    // Activate pixel for periodic checks
-                    activatePixelCoordinate(gridX, gridY);
-                }
-
-            }
-
-        }
-    }
-
-    public void generateOuterCircleUsingBresenhamsFiltered() {
-        int a = (int) this.x;  // Circle center X-coordinate
-        int b = (int) this.y;  // Circle center Y-coordinate
-        int r = this.outerRadius;  // Radius of the circle
-        int okamzitaVychylkaValue = getokamzitaVychylka();
-
-        int x = 0;
-        int y = r;
-        int d = 3 - 2 * r;  // Decision variable
-
-        // Add initial symmetric points if at least one is in the rectangle
-        addSymmetricPointsFiltered(x, y, a, b, okamzitaVychylkaValue);
-
-        // Loop through each step while x <= y
-        while (x <= y) {
-            x++;  // Move to the next horizontal position
-
-            // Update the decision variable and adjust y if needed
-            if (d < 0) {
-                d += 4 * x + 6; // Move horizontally
-            } else {
-                y--;           // Move diagonally (horizontal + vertical)
-                d += 4 * (x - y) + 10;
-            }
-
-            // Add symmetric points for the current (x, y)
-            addSymmetricPointsFiltered(x, y, a, b, okamzitaVychylkaValue);
-        }
-    }
-
-    public void generateInnerCircleUsingBresenhamsFiltered() {
-        int a = (int) this.x; // Circle center X-coordinate
-        int b = (int) this.y; // Circle center Y-coordinate
-        int r = this.innerRadius; // Current inner radius
-        int okamzitaVychylkaValue = getokamzitaVychylka();
-
-        int x = 0, y = r;
-        int d = 3 - 2 * r; // Decision variable
-
-        // Add initial symmetric points
-        addSymmetricPointsFilteredInner(x, y, a, b, okamzitaVychylkaValue);
-
-        // Loop for generating circle points
-        while (x <= y) {
-            x++;
-
-            // Update decision variable
-            if (d < 0) {
-                d += 4 * x + 6;
-            } else {
-                y--;
-                d += 4 * (x - y) + 10;
-            }
-
-            // Add symmetrical points for the inner circle
-            addSymmetricPointsFilteredInner(x, y, a, b, okamzitaVychylkaValue);
-        }
-    }
-
-
-    private void addSymmetricPointsFilteredInner(int x, int y, int a, int b, int okamzitaVychylkaValue) {
-        if (isAnySymmetricPointInRectangle(x, y, a, b)) {
-            removePointFromMapIfInRectangle(a + x, b + y, okamzitaVychylkaValue); // Quadrant 1
-            removePointFromMapIfInRectangle(a - x, b + y, okamzitaVychylkaValue); // Quadrant 2
-            removePointFromMapIfInRectangle(a + x, b - y, okamzitaVychylkaValue); // Quadrant 4
-            removePointFromMapIfInRectangle(a - x, b - y, okamzitaVychylkaValue); // Quadrant 3
-            removePointFromMapIfInRectangle(a + y, b + x, okamzitaVychylkaValue); // Transposed 1
-            removePointFromMapIfInRectangle(a - y, b + x, okamzitaVychylkaValue); // Transposed 2
-            removePointFromMapIfInRectangle(a + y, b - x, okamzitaVychylkaValue); // Transposed 3
-            removePointFromMapIfInRectangle(a - y, b - x, okamzitaVychylkaValue); // Transposed 4
-        }
-    }
-
-
-    private void removePointFromMapIfInRectangle(int x, int y, int okamzitaVychylkaValue) {
-        if (x >= xMin && x <= xMax && y >= yMin && y <= yMax) {
-            int gridX = Pixel.getGridX(x, controller.getXMin());
-            int gridY = Pixel.getGridY(y, controller.getYMin());
-
-            if (gridX >= 0 && gridX < pixelGrid.length && gridY >= 0 && gridY < pixelGrid[0].length) {
-                PixelCoordinate pixelCoord = new PixelCoordinate(gridX, gridY);
-
-                // If the pixel was previously visited, remove any "inner circle" influence
-                if (visitedPixels.contains(pixelCoord)) {
-                    visitedPixels.remove(pixelCoord); // Stop tracking this pixel
-                    duplicatePixels.remove(pixelCoord); // Remove from duplicate list
-                    pixelGrid[gridX][gridY].addVychylka(-50); // Reverse previous action
-
-                    deactivatePixelCoordinate(gridX, gridY);
-                }
-            }
-        }
-    }
-
-    private void deactivatePixelCoordinate(int gridX, int gridY) {
-        PixelCoordinate coord = new PixelCoordinate(gridX, gridY);
-
-        // Remove the coordinate from the active set
-        activePixelCoordinates.remove(coord);
-    }
-
-
-    private void addSymmetricPointsFiltered(int x, int y, int a, int b, int okamzitaVychylkaValue) {
-        // Perform early filtering: Add points only if at least one symmetric point is within the rectangle
-        if (isAnySymmetricPointInRectangle(x, y, a, b)) {
-            addPointToMapIfInRectangle(a + x, b + y, okamzitaVychylkaValue); // Quadrant 1
-            addPointToMapIfInRectangle(a - x, b + y, okamzitaVychylkaValue); // Quadrant 2
-            addPointToMapIfInRectangle(a + x, b - y, okamzitaVychylkaValue); // Quadrant 4
-            addPointToMapIfInRectangle(a - x, b - y, okamzitaVychylkaValue); // Quadrant 3
-            addPointToMapIfInRectangle(a + y, b + x, okamzitaVychylkaValue); // Transposed 1
-            addPointToMapIfInRectangle(a - y, b + x, okamzitaVychylkaValue); // Transposed 2
-            addPointToMapIfInRectangle(a + y, b - x, okamzitaVychylkaValue); // Transposed 3
-            addPointToMapIfInRectangle(a - y, b - x, okamzitaVychylkaValue); // Transposed 4
-        }
-    }
-
-
-    private boolean isAnySymmetricPointInRectangle(int x, int y, int a, int b) {
-        return isInRectangle(a + x, b + y) ||
-                isInRectangle(a - x, b + y) ||
-                isInRectangle(a + x, b - y) ||
-                isInRectangle(a - x, b - y) ||
-                isInRectangle(a + y, b + x) ||
-                isInRectangle(a - y, b + x) ||
-                isInRectangle(a + y, b - x) ||
-                isInRectangle(a - y, b - x);
-    }
-
-
-*/
-
-
 
 
 
@@ -914,88 +707,5 @@ public class SoundWave extends Circle {
         activePixelCoordinates.add(coord);
     }
 
-
-    /**
-     * Subtracts the contribution of this inner circle from the pixel map.
-     */
-    /*
-    private void subtractVychylkaIfInRectangle(int x, int y, int okamzitaVychylkaValue) {
-        // Check if the pixel is within the grid bounds
-        if (x >= xMin && x <= xMax && y >= yMin && y <= yMax) {
-            int gridX = Pixel.getGridX(x, controller.getXMin());
-            int gridY = Pixel.getGridY(y, controller.getYMin());
-
-            // Ensure the grid indices are within bounds
-            if (gridX >= 0 && gridX < pixelGrid.length && gridY >= 0 && gridY < pixelGrid[0].length) {
-                // Subtract the okamzitaVychylka value from the pixel
-                pixelGrid[gridX][gridY].addVychylka(-okamzitaVychylkaValue);
-
-                // Optionally deactivate the pixel (if no contributions remain)
-                deactivatePixelCoordinate(gridX, gridY);
-
-            }
-        }
-    }
-
-    /*
-      Subtracts the okamzitaVychylka contribution of the **inner circle** from the overlapping pixels.
-
-    private void subtractSymmetricPointsFilteredInner(int x, int y, int a, int b, int okamzitaVychylkaValue) {
-        if (isAnySymmetricPointInRectangle(x, y, a, b)) {
-            // Subtract only at points within the active rectangle
-            subtractVychylkaIfInRectangle(a + x, b + y, okamzitaVychylkaValue); // Quadrant 1
-            subtractVychylkaIfInRectangle(a - x, b + y, okamzitaVychylkaValue); // Quadrant 2
-            subtractVychylkaIfInRectangle(a + x, b - y, okamzitaVychylkaValue); // Quadrant 4
-            subtractVychylkaIfInRectangle(a - x, b - y, okamzitaVychylkaValue); // Quadrant 3
-            subtractVychylkaIfInRectangle(a + y, b + x, okamzitaVychylkaValue); // Transposed 1
-            subtractVychylkaIfInRectangle(a - y, b + x, okamzitaVychylkaValue); // Transposed 2
-            subtractVychylkaIfInRectangle(a + y, b - x, okamzitaVychylkaValue); // Transposed 3
-            subtractVychylkaIfInRectangle(a - y, b - x, okamzitaVychylkaValue); // Transposed 4
-        }
-    }
-*/
-
-
-    /**
-     * Logs duplicate pixels detected during circle generation.
-     */
-    /*
-    public void logDuplicatePixels() {
-        if (!duplicatePixels.isEmpty()) {
-            System.out.println("Duplicate Pixels Detected:");
-            for (PixelCoordinate pixel : duplicatePixels) {
-                System.out.println("Duplicate Pixel: " + pixel);
-            }
-            System.out.println("Total Duplicate Pixels: " + duplicatePixels.size());
-        } else {
-            System.out.println("No duplicate pixels detected.");
-        }
-    }
-*/
-
-    /**
-     * Generate the donut shape between the outer and inner circles
-     * and apply sinusoidal behavior for okamzitaVychylka at each pixel.
-     */
-
-
-    /**
-     * Sets the color of a pixel in the grid based on okamzitaVychylka.
-     * Maps -100 to 100 range to a color scale (blue for negative, red for positive,
-     * and white for neutral (0)).
-     */
-    /*
-    private void setPixelColor(int x, int y, int okamzitaVychylka) {
-        // Ensure pixel is within the grid boundary
-        if (x >= xMin && x <= xMax && y >= yMin && y <= yMax) {
-            int gridX = Pixel.getGridX(x, controller.getXMin());
-            int gridY = Pixel.getGridY(y, controller.getYMin());
-
-            if (gridX >= 0 && gridX < pixelGrid.length && gridY >= 0 && gridY < pixelGrid[0].length) {
-                pixelGrid[gridX][gridY].addVychylka(okamzitaVychylka);
-            }
-        }
-    }
-    */
 
 }
