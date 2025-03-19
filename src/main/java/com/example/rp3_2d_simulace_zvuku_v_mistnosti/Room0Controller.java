@@ -455,6 +455,7 @@ public class Room0Controller implements BaseRoomControllerInterface {
                 @Override
                 public void handle(ActionEvent event) {
                     waveManager.updateWaves(Room0Controller.this);
+
                 }
             }));
 

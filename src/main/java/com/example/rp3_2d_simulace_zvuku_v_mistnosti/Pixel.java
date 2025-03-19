@@ -128,6 +128,7 @@ public class Pixel extends Rectangle {
         if (lastUpdatedTime == null) {
             return -1; // The pixel has never been explicitly updated
         }
+        System.out.println(Duration.between(lastUpdatedTime, LocalDateTime.now()).getSeconds());
         return Duration.between(lastUpdatedTime, LocalDateTime.now()).getSeconds();
     }
 

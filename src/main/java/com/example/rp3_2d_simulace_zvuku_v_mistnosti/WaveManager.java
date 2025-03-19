@@ -4,7 +4,9 @@ import javafx.fxml.FXML;
 import javafx.scene.layout.Pane;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class WaveManager {
     // List to track all active waves in the room
@@ -14,6 +16,9 @@ public class WaveManager {
     // Reference to a WaveFactory to create new waves
     private WaveFactory waveFactory;
     private PixelManager pixelManager;
+    Pixel[][] pixelGrid;
+    private  Set<PixelCoordinate> activePixelCoordinates = new HashSet<>(); // Track coordinates of active pixels
+
 
     // Flag to track whether waves are currently running
     private boolean isRunning = false;
@@ -30,6 +35,7 @@ public class WaveManager {
         this.isRunning = false;
         this.centerPane = centerPane;
         this.pixelManager = pixelManager;
+
     }
 
     //Creates a new sound wave at the given coordinates (x, y) with the specified radius.
@@ -53,6 +59,7 @@ public class WaveManager {
         List<SoundWave> wavesToRemove = new ArrayList<>();
 
         for (SoundWave wave : activeWaves) {
+            activePixelCoordinates.clear();
             wave.grow();
 
             if (wave.getOuterRadius() > wave.getDeltaR()){
@@ -60,7 +67,6 @@ public class WaveManager {
 
                 }else{
                     if (!centerPane.getChildren().contains(wave.getInnerCircle())){
-                        //wave.addCirclesToPane( centerPane);
                     }
                 }
             }
@@ -69,13 +75,16 @@ public class WaveManager {
                 wavesToRemove.add(wave);
             }else if(wave.getAmplitude() <=0 ){
                 wavesToRemove.add(wave);
-
             }
 
+            // Add activePixelCoordinates from the wave to the WaveManager's activePixelCoordinates
+            activePixelCoordinates.addAll(wave.getactivePixelCoordinates());
 
         }
 
-        //checkWavesForCorners(controller);
+
+
+        pixelManager.resetAllInactivePixels(activePixelCoordinates);
         checkWavesForReflections(controller);
         activeWaves.removeAll(wavesToRemove);
         controller.overlayRectangles();

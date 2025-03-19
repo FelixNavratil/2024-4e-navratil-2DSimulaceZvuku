@@ -3,6 +3,7 @@ package com.example.rp3_2d_simulace_zvuku_v_mistnosti;
 import javafx.scene.layout.Pane;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * TODO
@@ -128,9 +129,14 @@ public class PixelManager {
             System.err.println("Pixel grid is not initialized.");
         }
     }
+    
+    public void resetAllInactivePixels(Set activePixelCoordinates){
+
+    }
 
 
     public int getPixelSize(){
+
         return PIXELSIZE;
     }
 

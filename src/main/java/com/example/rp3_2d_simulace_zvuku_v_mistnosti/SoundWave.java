@@ -518,10 +518,11 @@ public class SoundWave extends Circle {
 
         // Generate the donut wave dynamically
         if (outerRadius%PIXELSIZE == 0 && !isPaused){
-            generateDonutWithOkamzitaVychylka();
+            generateWaveDonut();
         }
 
-
+        savedSetOfPixelCoords.clear();
+        savedSetOfPixelCoords.addAll(activePixelCoordinates);
         // Reset visited and duplicate pixel sets for recalculating transitions
         resetVisitedPixels();
     }
@@ -532,8 +533,10 @@ public class SoundWave extends Circle {
     private final Set<PixelCoordinate> duplicatePixels = new HashSet<>(); // To store duplicates for debugging
     private final Set<PixelCoordinate> activePixelCoordinates = new HashSet<>(); // Track coordinates of active pixels
 
+    private final Set<PixelCoordinate> savedSetOfPixelCoords = new HashSet<>(); // save the active pixel coordinates in order to deliver it to waveManager
+
     public Set<PixelCoordinate> getactivePixelCoordinates   () {
-        return activePixelCoordinates;
+        return savedSetOfPixelCoords;
     }
 
     int counter = 0;
@@ -542,7 +545,7 @@ public class SoundWave extends Circle {
      * Generates concentric circles for the sound wave and updates the `okamzitaVychylka`
      * for every pixel in the donut (between innerRadius and outerRadius).
      */
-    public void generateDonutWithOkamzitaVychylka() {
+    public void generateWaveDonut() {
         // Calculate the wave width
         int waveWidth = outerRadius - innerRadius;
 
@@ -559,11 +562,14 @@ public class SoundWave extends Circle {
         int amplitudeIncrement = amplitude;
 
         // Debugging values
+        /*
         System.out.println("Amplitude Increment: " + amplitudeIncrement);
         System.out.println("Segment Size: " + segmentSize);
         System.out.println("Number of Circles: " + numberOfCircles);
         System.out.println("Outer Radius: " + outerRadius);
         System.out.println(" ");
+
+         */
 
         // Loop through all the concentric circles in the donut
         for (int i = 0; i < numberOfCircles; i++) {
@@ -574,14 +580,14 @@ public class SoundWave extends Circle {
             int amplitudeForCircle = calculateAmplitudeForCircle(i, segmentSize, amplitudeIncrement);
 
             // Debugging output
-            System.out.println("Circle Index: " + i + " | Amplitude: " + amplitudeForCircle);
+            //System.out.println("Circle Index: " + i + " | Amplitude: " + amplitudeForCircle);
 
             // Draw the circle with the calculated instantaneous displacement
             drawCircleWithOkamzitaVychylka((int) x, (int) y, radius, amplitudeForCircle);
         }
 
         // End cycle debugging output
-        System.out.println("End of donut generation *************************************************");
+        //System.out.println("End of donut generation *************************************************");
     }
 
     /**
