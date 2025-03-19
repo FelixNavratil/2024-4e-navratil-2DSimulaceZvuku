@@ -17,7 +17,7 @@ public class WaveManager {
     private WaveFactory waveFactory;
     private PixelManager pixelManager;
     Pixel[][] pixelGrid;
-    private  Set<PixelCoordinate> activePixelCoordinates = new HashSet<>(); // Track coordinates of active pixels
+
 
 
     // Flag to track whether waves are currently running
@@ -53,23 +53,18 @@ public class WaveManager {
         controller.overlayRectangles();
     }
 
-
     //Updates the current state of all active waves.
     public void updateWaves(BaseRoomControllerInterface controller) {
         List<SoundWave> wavesToRemove = new ArrayList<>();
+        Set<PixelCoordinate> activePixelCoordinates = new HashSet<>(); // Track coordinates of active pixels
+
+        // Temporary set to hold new active pixel coordinates for this update cycle
 
         for (SoundWave wave : activeWaves) {
-            activePixelCoordinates.clear();
+
             wave.grow();
 
-            if (wave.getOuterRadius() > wave.getDeltaR()){
-                if (wave.getInnerCircle()== null){
 
-                }else{
-                    if (!centerPane.getChildren().contains(wave.getInnerCircle())){
-                    }
-                }
-            }
 
             if (wave.isOlderThan(8000)) {
                 wavesToRemove.add(wave);
@@ -84,10 +79,13 @@ public class WaveManager {
 
 
 
+
         pixelManager.resetAllInactivePixels(activePixelCoordinates);
+
         checkWavesForReflections(controller);
         activeWaves.removeAll(wavesToRemove);
-        controller.overlayRectangles();
+        //controller.overlayRectangles();
+
     }
 
     /**

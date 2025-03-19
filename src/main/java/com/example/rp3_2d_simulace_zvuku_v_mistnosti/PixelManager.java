@@ -131,7 +131,19 @@ public class PixelManager {
     }
     
     public void resetAllInactivePixels(Set activePixelCoordinates){
+// Iterate through every row in the pixelGrid
+        for (int row = 0; row < pixelGrid.length; row++) {
+            // Iterate through every column in the current row
+            for (int col = 0; col < pixelGrid[row].length; col++) {
+                Pixel currentPixel = pixelGrid[row][col]; // Access the current pixel
+                PixelCoordinate currentPixelCoordinate = currentPixel.getCoordinates(); // Get its coordinates
 
+                // Check if the current pixel's coordinates are NOT in activePixelCoordinates
+                if (!activePixelCoordinates.contains(currentPixelCoordinate)) {
+                    currentPixel.setDefault(); // Reset the pixel to default state
+                }
+            }
+        }
     }
 
 

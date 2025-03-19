@@ -518,11 +518,12 @@ public class SoundWave extends Circle {
 
         // Generate the donut wave dynamically
         if (outerRadius%PIXELSIZE == 0 && !isPaused){
+            savedSetOfPixelCoords.clear();
             generateWaveDonut();
+            savedSetOfPixelCoords.addAll(activePixelCoordinates);
         }
 
-        savedSetOfPixelCoords.clear();
-        savedSetOfPixelCoords.addAll(activePixelCoordinates);
+
         // Reset visited and duplicate pixel sets for recalculating transitions
         resetVisitedPixels();
     }

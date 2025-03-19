@@ -270,4 +270,8 @@ public class Pixel extends Rectangle {
 
         }
     }
+
+    public PixelCoordinate getCoordinates() {
+        return new PixelCoordinate(gridX, gridY);
+    }
 }
