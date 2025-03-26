@@ -16,7 +16,6 @@ public class WaveManager {
     // Reference to a WaveFactory to create new waves
     private WaveFactory waveFactory;
     private PixelManager pixelManager;
-    Pixel[][] pixelGrid;
 
 
 
@@ -24,7 +23,7 @@ public class WaveManager {
     private boolean isRunning = false;
 
     @FXML
-    private Pane centerPane = new Pane();
+    private Pane centerPane;
 
     private Calculator calculator = new Calculator();
 
@@ -88,15 +87,7 @@ public class WaveManager {
 
     }
 
-    /**
-     * Checks and adjusts the wave's immediate displacement (okamzitaVychylka)
-     * based on the given amplitude. If the displacement exceeds the amplitude,
-     * it is constrained to the amplitude's bounds.
-     *
-     * @param amplitude The maximum allowable displacement for the wave.
-     * @param okamzitaVychylka The current immediate displacement of the wave.
-     * @return The adjusted immediate displacement if it exceeds bounds; otherwise, the original displacement.
-     */
+
     private int checkWavesForAmplitude(int amplitude, int okamzitaVychylka){
 
         if (amplitude <= okamzitaVychylka || -amplitude >= okamzitaVychylka){
@@ -334,14 +325,6 @@ public class WaveManager {
         removeAllWaves(centerPane);
         activeWaves.clear();
 
-    }
-
-    public boolean isRunning() {
-        return isRunning;
-    }
-
-    public List<SoundWave> getActiveWaves() {
-        return activeWaves;
     }
 
     public void removeAllWaves(Pane centerPane){

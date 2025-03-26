@@ -11,24 +11,6 @@ public class Point {
         setY(y);
     }
 
-    public Point(double[] coords){
-        setX(coords[0]);
-        setY(coords[1]);
-    }
-
-    public Point(int x, int y){
-        setX(x);
-        setY(y);
-    }
-
-    public void setOkamzitaVychylka(int okamzitaVychylka) {
-        this.okamzitaVychylka = okamzitaVychylka;
-    }
-
-    public int getOkamzitaVychylka() {
-        return okamzitaVychylka;
-    }
-
     public Point(Line line1, Line line2){
         setX(calculator.calculateIntersection(line1, line2).getX());
         setY(calculator.calculateIntersection(line1, line2).getY());
@@ -59,7 +41,4 @@ public class Point {
     }
 
 
-    public double[] getCoords(){
-        return new double[]{x,y};
-    }
 }

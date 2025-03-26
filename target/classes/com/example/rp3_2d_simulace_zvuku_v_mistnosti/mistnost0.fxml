@@ -37,7 +37,7 @@
 
 
             <Label fx:id="labelInstrukce"
-                   text="zacnete kliknutim na &#10;bilou cast obrazovky"
+
             />
             <!-- Tlacitka v top sekci-->
             <Button fx:id="buttonStop"

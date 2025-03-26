@@ -23,14 +23,7 @@ public class PixelManager {
         this.roomController = roomController;
     }
 
-    /**
-     * Initializes the 2D array of Pixels based on the rectangle's width, height, and its position in the scene.
-     *
-     * @param rectWidth     Width of the rectangle (number of columns in the grid).
-     * @param rectHeight    Height of the rectangle (number of rows in the grid).
-     * @param rectX     The starting X-coordinate of the rectangle in the scene.
-     * @param rectY     The starting Y-coordinate of the rectangle in the scene.
-     */
+
     public void initializePixelGrid(int rectWidth, int rectHeight, double rectX, double rectY) {
         // Get the stroke width from the controller
         double strokeWidth = roomController.getStroke();
@@ -70,11 +63,7 @@ public class PixelManager {
         System.out.println("Start X: " + startX + ", Start Y: " + startY);
     }
 
-    /**
-     * Adds all the pixel rectangles to a JavaFX Pane for visualization.
-     *
-     * @param pane The Pane where rectangles will be added.
-     */
+
     public void addRectanglesToPane(Pane pane) {
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
@@ -85,27 +74,9 @@ public class PixelManager {
         }
     }
 
-    /**
-     * Get the 2D pixel grid.
-     *
-     * @return A 2D array of Pixels.
-     */
+
     public Pixel[][] getPixelGrid() {
         return pixelGrid;
-    }
-
-    /**
-     *  add okamzitaVychylka to celkovaVychylka in a specific pixel
-     * @param gridX
-     * @param gridY
-     * @param okamzitaVychylka
-     */
-    public void setPixelColor(int gridX, int gridY, int okamzitaVychylka){
-        pixelGrid[gridX][gridY].setCelkovaVychylka(okamzitaVychylka);
-    }
-
-    public void setPixelToDefault(int gridX, int gridY){
-        pixelGrid[gridX][gridY].setDefault();
     }
 
     /**
@@ -152,9 +123,7 @@ public class PixelManager {
         return PIXELSIZE;
     }
 
-    public Pixel getPixel(int gridX, int gridY){
-        return pixelGrid[gridX][gridY];
-    }
+
 
 
 

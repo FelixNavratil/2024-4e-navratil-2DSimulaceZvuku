@@ -70,18 +70,7 @@ public class SoundWave extends Circle {
         topRight = controller.getRoomCorners().get(3);
         intersections = getIntersectionsWithWalls(x, y);
 
-        // Initialize the inner circle (it will be made visible later)
-        /*
-        innerCircle = new Circle();
-        innerCircle.setCenterX(x);
-        innerCircle.setCenterY(y);
-        innerCircle.setStrokeWidth(2.0);
-        innerCircle.setFill(null); // Ensures it's a "ring"
-        innerCircle.setStroke(javafx.scene.paint.Color.BLUE); // Match outer circle stroke color
 
-         */
-
-        //updateColor(PERIODA);
     }
 
     private void createInnerCircle(double x , double y, int innerRadius) {
@@ -97,9 +86,6 @@ public class SoundWave extends Circle {
         else return null;
     }
 
-    public int getDeltaR() {
-        return deltaR;
-    }
 
     public void setPixelManager(PixelManager pixelManager){
         this.pixelManager = pixelManager;
@@ -160,19 +146,7 @@ public class SoundWave extends Circle {
 
     }
 
-    //zjisteni kdy vlna dosahne rohu
-    public int[] getCornerDistances () {
-        int[] distances = new int[4];
 
-
-        // Calculate distances using the Point class's distance method
-        distances[0] = (int)center.distance(topLeft);      // Distance to top-left corner
-        distances[1] = (int)center.distance(bottomLeft);   // Distance to bottom-left corner
-        distances[2] = (int)center.distance(bottomRight);  // Distance to bottom-right corner
-        distances[3] = (int)center.distance(topRight);     // Distance to top-right corner
-
-        return distances;
-    }
 
 
     public int[] getReflectionDistances(){
@@ -301,17 +275,8 @@ public class SoundWave extends Circle {
         }
     }
 
-    /**
-     * Calculates the instantaneous displacement (okamžitá výchylka) of the sound wave
-     * based on its current phase within the oscillation cycle.
-     * The calculation depends on the amplitude, oscillation direction, and elapsed time.
-     *
-     * @return The instantaneous displacement of the wave. Positive, negative, or zero values indicate
-     *         the wave's position relative to its equilibrium point during its oscillation cycle.
-     *
-     *
-     */
 
+    //calculates the okamzita vychylka based on elapsed time and the phaze of the wave
     public int getokamzitaVychylka() {
         if (direction == 1) {
             // Ensure amplitude is positive
@@ -385,43 +350,15 @@ public class SoundWave extends Circle {
     }
 
 
-/*
-    public int getokamzitaVychylka() {
-        return 100;
-    }*/
-
 
     public Point getCenter() {
         return center;
     }
 
-
-    
-/*
-    private void updateColor(double perioda){
-        Timeline colorTransition = new Timeline(
-                new KeyFrame(Duration.ZERO,
-                        new KeyValue(this.strokeProperty(), Color.LIGHTGRAY)
-                ),
-                new KeyFrame(Duration.seconds(perioda/2),
-                        new KeyValue(this.strokeProperty(), Color.BLACK)
-                ),
-                new KeyFrame(Duration.seconds(perioda),
-                        new KeyValue(this.strokeProperty(), Color.LIGHTGRAY)
-                )
-        );
-        colorTransition.setCycleCount(Timeline.INDEFINITE); // Keep repeating
-        colorTransition.setAutoReverse(true); // Reverse the transition after completing
-        colorTransition.play();
-    }
-*/
     public int getOuterRadius() {
         return outerRadius;
     }
 
-    public int getInnerRadius() {
-        return innerRadius; // Inner radius
-    }
 
     public void pause() {
         if (!isPaused) {
@@ -443,9 +380,6 @@ public class SoundWave extends Circle {
         return x > controller.getXMin() && x < controller.getXMax() && y > controller.getYMin() && y < controller.getYMax();
     }
 
-    public boolean isInRectangle(int x, int y){
-        return x > xMin && x < xMax && y > yMin && y < yMax;
-    }
 
     public boolean isBellowRectangle(double x, double y){
         return x > controller.getXMin() && x < controller.getXMax() && y > controller.getYMax();
@@ -540,8 +474,6 @@ public class SoundWave extends Circle {
         return savedSetOfPixelCoords;
     }
 
-    int counter = 0;
-
     /**
      * Generates concentric circles for the sound wave and updates the `okamzitaVychylka`
      * for every pixel in the donut (between innerRadius and outerRadius).
@@ -553,24 +485,7 @@ public class SoundWave extends Circle {
         // Calculate the number of circles in the donut
         int numberOfCircles = waveWidth / PIXELSIZE;
 
-        // Determine how many segments currently exist (1 to 4 based on outerRadius)
-        int existingSegments = Math.max(1, Math.min(4, (outerRadius * 4) / deltaR));
 
-        // Segment size (number of circles per segment)
-        int segmentSize = Math.max(1, numberOfCircles / existingSegments); // Avoid division by 0
-
-        // Amplitude increment per circle
-        int amplitudeIncrement = amplitude;
-
-        // Debugging values
-        /*
-        System.out.println("Amplitude Increment: " + amplitudeIncrement);
-        System.out.println("Segment Size: " + segmentSize);
-        System.out.println("Number of Circles: " + numberOfCircles);
-        System.out.println("Outer Radius: " + outerRadius);
-        System.out.println(" ");
-
-         */
 
         // Loop through all the concentric circles in the donut
         for (int i = 0; i < numberOfCircles; i++) {
@@ -578,7 +493,7 @@ public class SoundWave extends Circle {
             int radius = innerRadius + ((numberOfCircles - i - 1) * PIXELSIZE);
 
             // Determine amplitude for the current circle
-            int amplitudeForCircle = calculateAmplitudeForCircle(i, segmentSize, amplitudeIncrement);
+            int amplitudeForCircle = calculateAmplitudeForCircle(i);
 
             // Debugging output
             //System.out.println("Circle Index: " + i + " | Amplitude: " + amplitudeForCircle);
@@ -604,14 +519,14 @@ public class SoundWave extends Circle {
      * Determines the amplitude (okamzitaVychylka) for the given circle index
      * based on its position in the wave cycle.
      */
-    private int calculateAmplitudeForCircle(int circleIndex, int segmentSize, int amplitudeIncrement) {
+    private int calculateAmplitudeForCircle(int circleIndex) {
 
         if  (circleIndex < 5){
-            return amplitudeIncrement;
+            return amplitude/5;
         }else if (circleIndex < 15){
-            return -amplitudeIncrement;
+            return -amplitude/5;
         }else{
-            return amplitudeIncrement;
+            return amplitude/5;
         }
     }
 
@@ -641,7 +556,7 @@ public class SoundWave extends Circle {
 
 
     /**
-     * Sets the instantaneous displacement (`okamzitaVychylka`) for all eight symmetric octants of a circle.
+     * Sets  okamzitaVychylka for all eight symmetric octants of a circle.
      */
     private void setCirclePixelsDisplacement(int centerX, int centerY, int x, int y, int okamzitaVychylkaValue) {
 
@@ -701,9 +616,6 @@ public class SoundWave extends Circle {
         //}
     }
 
-    public void addCirclesToPane(Pane pane) {
-        pane.getChildren().addAll(this, innerCircle);
-    }
 
 
 

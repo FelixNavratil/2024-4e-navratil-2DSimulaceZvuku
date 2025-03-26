@@ -35,7 +35,7 @@
               style="-fx-background-color: lightgrey;"> <!-- Set the background color here -->
 
             <Label fx:id="labelInstrukce"
-                   text="zacnete kliknutim na &#10;bilou cast obrazovky" />
+                    />
             <!-- Buttons in the top section -->
             <Button fx:id="buttonStop"
                     text="Stop"

@@ -29,14 +29,8 @@ public class Room0Controller implements BaseRoomControllerInterface {
     Room0 room0 = new Room0();
     private int room0Height = room0.getMistnost0ScreenHeight();
     private int room0Width = room0.getMistnost0ScreenWidth();
-    private double rectangleHeight = (double) room0Height /4;
     private double rectangleSize = (double) room0Width /4;
-    private static boolean vlnaExistuje = false;
     private boolean isRunning = true;
-    private double currentRadius = 0;      // To track the current radius for resuming
-    private double x;
-    private double y;
-    private  final double maxRadius = Math.sqrt(rectangleHeight*rectangleHeight + rectangleSize * rectangleSize);
     private final int roomID = 0;
     private double xMin;
     private double xMax;
@@ -52,34 +46,9 @@ public class Room0Controller implements BaseRoomControllerInterface {
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    //getters
-    public int getRoom0Height(){
-        return room0Height;
-    }
-    public int getRoom0Width(){
-        return room0Width;
-    }
-    public Pane getCenterPane(){
-        return centerPane;
-    }
-    public boolean getVlnaExistuje() {
-        return vlnaExistuje;
-    }
-    public boolean getIsRunning(){
-        return isRunning;
-    }
-    public double getCurrentRadius(){
-        return currentRadius;
-    }
-    public double getX() {
-        return x;
-    }
-    public double getY() {
-        return y;
-    }
-    public int getRoomID() {
-        return roomID;
-    }
+
+
+
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------
     //inicializace promennych
@@ -99,10 +68,6 @@ public class Room0Controller implements BaseRoomControllerInterface {
     @FXML
     private Pane centerPane;
     @FXML
-    private HBox mistnost0HBox;
-    @FXML
-    private HBox buttonHlavniMenuHBox;
-    @FXML
     private Label bottomText;
     @FXML
     private Rectangle rectangle;
@@ -119,15 +84,6 @@ public class Room0Controller implements BaseRoomControllerInterface {
     PixelManager pixelManager;
     private WaveManager waveManager = new WaveManager(waveFactory, centerPane, pixelManager);
     private Timeline waveTimeline;
-
-
-    public void setSceneDimensions(Scene scene, int height, int width) {
-
-        stage.setScene(scene);
-        stage.setHeight(height);
-        stage.setWidth(width);
-        updateLayout();
-    }
 
     public void setStage(Stage stage) {
 
@@ -222,13 +178,6 @@ public class Room0Controller implements BaseRoomControllerInterface {
         }
     }
 
-    public double getRectangleWidth() {
-        return rectangle != null ? rectangle.getWidth() : 0;
-    }
-
-    public double getRectangleHeight() {
-        return rectangle != null ? rectangle.getHeight() : 0;
-    }
 
     public int getXMin() {
         return (int) xMin;
@@ -464,7 +413,4 @@ public class Room0Controller implements BaseRoomControllerInterface {
         }
     }
 
-    public Pixel[][] getPixelGrid(){
-        return pixelManager.getPixelGrid();
-    }
 }

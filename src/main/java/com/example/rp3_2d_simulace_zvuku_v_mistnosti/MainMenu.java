@@ -36,11 +36,4 @@ public class MainMenu {
         stage.show();
     }
 
-    public int getHlavniMenuSceeneHeight() {
-        return hlavniMenuSceeneHeight;
-    }
-
-    public int getHlavniMenuSceneWidth() {
-        return hlavniMenuSceneWidth;
-    }
 }

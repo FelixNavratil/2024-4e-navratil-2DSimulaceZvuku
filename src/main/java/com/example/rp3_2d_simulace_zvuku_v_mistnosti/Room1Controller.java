@@ -30,12 +30,7 @@ public class Room1Controller implements BaseRoomControllerInterface {
     private int room1Width = room1.getMistnost1ScreenWidth();
     private double rectangleHeight = (double) room1Height / 4;
     private double rectangleWidth = (double) room1Width / 4;
-    private static boolean vlnaExistuje = false;
     private boolean isRunning = true;
-    private double currentRadius = 0;
-    private double x;
-    private double y;
-    private final int roomID = 1;
 
     private double xMin;
     private double xMax;
@@ -72,8 +67,7 @@ public class Room1Controller implements BaseRoomControllerInterface {
     private Button buttonReset;
     @FXML
     private Pane centerPane;
-    @FXML
-    private HBox mistnost1HBox;
+
     @FXML
     private Label bottomText;
     @FXML
@@ -91,12 +85,6 @@ public class Room1Controller implements BaseRoomControllerInterface {
     private WaveManager waveManager = new WaveManager(waveFactory, centerPane, pixelManager);
     private Timeline waveTimeline;
 
-    public void setSceneDimensions(Scene scene, int height, int width) {
-        stage.setScene(scene);
-        stage.setHeight(height);
-        stage.setWidth(width);
-        updateLayout();
-    }
 
     public void setStage(Stage stage) {
         this.stage = stage;
@@ -378,7 +366,4 @@ public class Room1Controller implements BaseRoomControllerInterface {
         }
     }
 
-    public Pixel[][] getPixelGrid(){
-        return pixelManager.getPixelGrid();
-    }
 }

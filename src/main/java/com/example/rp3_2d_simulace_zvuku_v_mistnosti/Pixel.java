@@ -61,31 +61,12 @@ public class Pixel extends Rectangle {
         return (int) Math.floor((realY - yMIn) / PIXELSIZE);
     }
 
-    public int getCelkovaVychylka() {
-        return celkovaVychylka;
-    }
-
     public void setCelkovaVychylka(int celkovaVychylka) {
         this.celkovaVychylka = celkovaVychylka;
         setColor(celkovaVychylka);
         updateLastUpdatedTime(); // Explicitly update the time only here
     }
 
-    public int getGridX() {
-        return gridX;
-    }
-
-    public int getGridY() {
-        return gridY;
-    }
-
-    public double getRealX() {
-        return realX;
-    }
-
-    public double getRealY() {
-        return realY;
-    }
 
     public Rectangle getRectangle() {
         return rectangle;
@@ -112,67 +93,10 @@ public class Pixel extends Rectangle {
 
 
 
-    /**
-     * Updates the timestamp to the current time when the pixel's color is explicitly updated.
-     */
     private void updateLastUpdatedTime() {
         lastUpdatedTime = LocalDateTime.now();
     }
 
-    /**
-     * Calculates the time in seconds that has passed since the pixel's color was last updated.
-     *
-     * @return Elapsed time in seconds as a long, or -1 if the pixel has never been updated.
-     */
-    public long getTimeSinceLastUpdateInSeconds() {
-        if (lastUpdatedTime == null) {
-            return -1; // The pixel has never been explicitly updated
-        }
-        System.out.println(Duration.between(lastUpdatedTime, LocalDateTime.now()).getSeconds());
-        return Duration.between(lastUpdatedTime, LocalDateTime.now()).getSeconds();
-    }
-
-    /**
-     * Checks if the time since the last update is greater than or equal to PERIODA.
-     *
-     * @return True if the time elapsed since the last update is greater than or equal to PERIODA, otherwise false.
-     */
-    public boolean hasTimeElapsed() {
-        if (lastUpdatedTime == null) {
-            return false; // Consider not elapsed if the pixel has never been explicitly updated
-        }
-        return Duration.between(lastUpdatedTime, LocalDateTime.now()).getSeconds() >= PERIODA;
-    }
-
-    /**
-     * Calculates the time in milliseconds that has passed since the pixel's color was last updated.
-     *
-     * @return Elapsed time in milliseconds as a long, or -1 if the pixel has never been updated.
-     */
-    public long getTimeSinceLastUpdateInMilliseconds() {
-        if (lastUpdatedTime == null) {
-            return -1; // The pixel has never been explicitly updated
-        }
-        return Duration.between(lastUpdatedTime, LocalDateTime.now()).toMillis();
-    }
-
-    public void setColor(Paint color) {
-        this.setFill(color);
-    }
-
-    /**
-     * Checks if the time since the last update is greater than 1 second, and if so,
-     * resets the color of the pixel to default.
-     */
-    public void resetToDefaultIfOutdated() {
-        if (lastUpdatedTime != null) {
-            long elapsedTime = getTimeSinceLastUpdateInSeconds();
-            if (elapsedTime > 1) { // Check if the last update is greater than 1 second
-                setDefault(); // Reset the color to default
-                System.out.println("Pixel color reset to default due to timeout.");
-            }
-        }
-    }
 
     @Override
     public String toString() {

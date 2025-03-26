@@ -1,13 +1,7 @@
 package com.example.rp3_2d_simulace_zvuku_v_mistnosti;
 
 public class Calculator {
-    /**
-     * Calculate the intersection point of two lines in general form (Ax + By + C = 0).
-     *
-     * @param line1 First line
-     * @param line2 Second line
-     * @return A double array [x, y] representing the intersection point, or null if no unique intersection exists.
-     */
+
     public Point calculateIntersection(Line line1, Line line2) {
         // Extract coefficients from each line
         double A1 = line1.getA();
@@ -44,7 +38,7 @@ public class Calculator {
         double x = point.getX();
         double y = point.getY();
 
-        // Calculate projection point (foot of perpendicular)
+        // Calculate projection point
         double denominator = A * A + B * B;
         if (denominator == 0) {
             throw new IllegalArgumentException("Invalid line coefficients: A and B cannot both be zero.");
@@ -62,16 +56,5 @@ public class Calculator {
     }
 
 
-    /**
-     * Calculate the distance between two points given their coordinates as integers.
-     *
-     * @param x1 x-coordinate of the first point
-     * @param y1 y-coordinate of the first point
-     * @param x2 x-coordinate of the second point
-     * @param y2 y-coordinate of the second point
-     * @return The distance between the two points as a double
-     */
-    public double calculateDistance(int x1, int y1, int x2, int y2) {
-        return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
-    }
+
 }
