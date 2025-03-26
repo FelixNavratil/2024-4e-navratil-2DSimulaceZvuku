@@ -30,7 +30,9 @@ public class Room1Controller implements BaseRoomControllerInterface {
     private int room1Width = room1.getMistnost1ScreenWidth();
     private double rectangleHeight = (double) room1Height / 4;
     private double rectangleWidth = (double) room1Width / 4;
+
     private boolean isRunning = true;
+
 
     private double xMin;
     private double xMax;

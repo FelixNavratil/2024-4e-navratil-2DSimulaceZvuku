@@ -35,13 +35,12 @@ public class SoundWave extends Circle {
      * Constructor initializes the SoundWave object, its position, and relevant fields.
      * It also generates the mathematical representation of the sound wave circle.
      */
-    public SoundWave(double x, double y, BaseRoomControllerInterface controller, int radius, int okamzitaVychylka, int amplitude, int direction) {
+    public SoundWave(double x, double y, BaseRoomControllerInterface controller, int radius,  int amplitude, int direction) {
         super(x, y, 0); // Initialize circle with position (x, y) and radius 0
         this.x = x;
         this.y = y;
         this.outerRadius = radius;
         this.amplitude = amplitude;
-        this.okamzitaVychylka = okamzitaVychylka;
         this.direction = direction;
 
         // Initialize the room and geometric properties

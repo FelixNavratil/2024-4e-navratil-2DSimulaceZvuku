@@ -43,7 +43,7 @@ public class WaveManager {
             System.err.println("Error: centerPane is null. Cannot add wave.");
             return;
         }
-        SoundWave wave = waveFactory.createWave(x, y, controller, radius, okamzitaVychylka, amplitude, direction);
+        SoundWave wave = waveFactory.createWave(x, y, controller, radius, amplitude, direction);
         activeWaves.add(wave);
         wave.setPixelManager(pixelManager);
         //centerPane.getChildren().add(wave);
@@ -83,23 +83,13 @@ public class WaveManager {
 
         checkWavesForReflections(controller);
         activeWaves.removeAll(wavesToRemove);
-        //controller.overlayRectangles();
+
 
     }
 
 
-    private int checkWavesForAmplitude(int amplitude, int okamzitaVychylka){
-
-        if (amplitude <= okamzitaVychylka || -amplitude >= okamzitaVychylka){
-            if (okamzitaVychylka>0){
-                okamzitaVychylka=amplitude;
-            } else if (okamzitaVychylka < 0) {
-                okamzitaVychylka = -amplitude;
-            }
-            return okamzitaVychylka;
-        }else{
-            return okamzitaVychylka;
-        }
+    private int checkWavesForAmplitude(int amplitude){
+        return amplitude;
 
     }
 
@@ -123,7 +113,7 @@ public class WaveManager {
                     if (currentRadius == reflectionDistances[i]) {
                         Line reflectingWall = controller.getRoomWalls().get(i);
                         Point symmetricPoint = new Calculator().calculateSymetricPoint(center, reflectingWall);
-                        int okamzitaVychylka = checkWavesForAmplitude(wave.getAmplitude(), wave.getokamzitaVychylka());
+                        int okamzitaVychylka = checkWavesForAmplitude(wave.getAmplitude());
                         createWave(symmetricPoint.getX(), symmetricPoint.getY(), controller, wave.getOuterRadius(), okamzitaVychylka, wave.getAmplitude()-20,  -1*wave.getDirection());
                         break;
                     }
@@ -136,10 +126,7 @@ public class WaveManager {
 
     //Specialized handling for waves that hit the corners of the rectangle when outside.
     private void handleOutOfRectangleWaveForCorners(SoundWave wave, Point center, BaseRoomControllerInterface controller) {
-        Point topLeft = controller.getRoomCorners().get(0);
-        Point bottomLeft = controller.getRoomCorners().get(1);
-        Point bottomRight = controller.getRoomCorners().get(2);
-        Point topRight = controller.getRoomCorners().get(3);
+
         int currentRadius = wave.getOuterRadius();
 
         if (wave.isAboveRectangle(center.getX(), center.getY())) {
@@ -288,7 +275,7 @@ public class WaveManager {
         Point center = wave.getCenter();
         Line reflectingWall = controller.getRoomWalls().get(wallIndex);
         Point symmetricPoint = new Calculator().calculateSymetricPoint(center, reflectingWall);
-        int okamzitaVychylka = checkWavesForAmplitude(wave.getAmplitude(), wave.getokamzitaVychylka());
+        int okamzitaVychylka = checkWavesForAmplitude(wave.getAmplitude());
         if (wave.getAmplitude()-20 >0){
             createWave(symmetricPoint.getX(), symmetricPoint.getY(), controller, wave.getOuterRadius(), okamzitaVychylka, wave.getAmplitude()-50, -1*wave.getDirection());
         }
@@ -297,7 +284,7 @@ public class WaveManager {
     private void reflectWave(Point center, int currentRadius, BaseRoomControllerInterface controller, int wallIndex, int okamzitaVychylka, int amplituda, int direction) {
         Line reflectingWall = controller.getRoomWalls().get(wallIndex);
         Point symmetricPoint = new Calculator().calculateSymetricPoint(center, reflectingWall);
-        int novaOkamzitaVychylka = checkWavesForAmplitude(amplituda, okamzitaVychylka);
+        int novaOkamzitaVychylka = checkWavesForAmplitude(amplituda);
         if (amplituda-20 >0){
             createWave(symmetricPoint.getX(), symmetricPoint.getY(), controller, currentRadius, novaOkamzitaVychylka, amplituda-50, -1*direction);
         }
