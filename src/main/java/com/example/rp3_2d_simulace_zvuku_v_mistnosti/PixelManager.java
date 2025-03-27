@@ -16,8 +16,7 @@ public class PixelManager {
     private BaseRoomControllerInterface roomController;
     private static final int PIXELSIZE = 3;
 
-    //nezapomen zmenit periodu i v soundWave
-    public int perioda = 3;
+
 
     public PixelManager(BaseRoomControllerInterface roomController) {
         this.roomController = roomController;
@@ -53,7 +52,6 @@ public class PixelManager {
                 // Create a new pixel and add it to the grid
                 pixelGrid[x][y] = new Pixel(x, y, realX, realY);
                 pixelGrid[x][y].setPixelSize(PIXELSIZE);
-                pixelGrid[x][y].setPeriode(perioda);
             }
         }
 
@@ -100,7 +98,8 @@ public class PixelManager {
             System.err.println("Pixel grid is not initialized.");
         }
     }
-    
+
+    //Resets all the pixels that are not in the set.
     public void resetAllInactivePixels(Set activePixelCoordinates){
 // Iterate through every row in the pixelGrid
         for (int row = 0; row < pixelGrid.length; row++) {
@@ -119,13 +118,7 @@ public class PixelManager {
 
 
     public int getPixelSize(){
-
         return PIXELSIZE;
     }
 
-
-
-
-
-    // Additional methods omitted for brevity, unchanged...
 }

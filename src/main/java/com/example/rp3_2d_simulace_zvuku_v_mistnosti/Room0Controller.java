@@ -31,7 +31,6 @@ public class Room0Controller implements BaseRoomControllerInterface {
     private int room0Width = room0.getMistnost0ScreenWidth();
     private double rectangleSize = (double) room0Width /4;
     private boolean isRunning = true;
-    private final int roomID = 0;
     private double xMin;
     private double xMax;
     private double yMin;
@@ -44,13 +43,6 @@ public class Room0Controller implements BaseRoomControllerInterface {
     Rectangle rightRectangle;
     private int strokeWidth = 4;
 
-//--------------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-
-//--------------------------------------------------------------------------------------------------------------------------------------------------------
     //inicializace promennych
 
     @FXML

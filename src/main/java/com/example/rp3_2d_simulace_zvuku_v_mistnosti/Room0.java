@@ -29,13 +29,10 @@ public class Room0 {
         stage.show();
     }
 
-
-
     // Getter for Scene Height
     public int getMistnost0ScreenHeight(){
         return mistnost0ScreenHeight;
     }
-
 
     // Getter for Scene Width
     public int getMistnost0ScreenWidth(){

@@ -1,6 +1,5 @@
 package com.example.rp3_2d_simulace_zvuku_v_mistnosti;
 
-import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 
@@ -27,9 +26,7 @@ public class SoundWave extends Circle {
     private int xMin, xMax, yMin, yMax;
 
     //nezapomen zmenit periodu i v soundWave
-    public  int PERIODA = 5;
     private int PIXELSIZE = 3;
-    private int okamzitaVychylka;
 
     /**
      * Constructor initializes the SoundWave object, its position, and relevant fields.
@@ -110,18 +107,6 @@ public class SoundWave extends Circle {
     private long elapsedPausedTime = 0; // Time we've spent paused
     private long pauseStartTime; // When the wave was paused
     private boolean isPaused = false; // Is the wave currently paused?
-
-
-    // Getter to calculate elapsedTime dynamically
-    public double getElapsedTime() {
-        if (isPaused) {
-            // If paused, return the time until the pause started
-            return (pauseStartTime - creationTime - elapsedPausedTime) / 1000.0; // Convert ms to seconds
-        } else {
-            // If not paused, return total elapsed time
-            return (System.currentTimeMillis() - creationTime - elapsedPausedTime) / 1000.0; // Convert ms to seconds
-        }
-    }
 
 
     private Calculator calculator = new Calculator();
@@ -276,76 +261,8 @@ public class SoundWave extends Circle {
 
 
     //calculates the okamzita vychylka based on elapsed time and the phaze of the wave
-    public int getokamzitaVychylka() {
-        if (direction == 1) {
-            // Ensure amplitude is positive
-            amplitude = Math.max(amplitude, 0);
-
-            // Cycle duration (perioda)
-            double cycleDuration =  PERIODA;
-
-            // Total number of steps (for full cycle)
-            int stepsToAmplitude = amplitude;             // 0 to +amplitude
-            int stepsToNegativeAmplitude = 2 * amplitude; // +amplitude to -amplitude
-            int stepsToZero = amplitude;                  // -amplitude back to 0
-            int totalSteps = stepsToAmplitude + stepsToNegativeAmplitude + stepsToZero;
-
-            // Derive time per step dynamically
-            double timePerStep = cycleDuration / totalSteps;
-
-            // Normalize elapsedTime to the cycle (loop every cycleDuration)
-            double timeInCycle = getElapsedTime() % cycleDuration;
-
-            // Calculate which step we are in based on elapsed time
-            int currentStep = (int) (timeInCycle / timePerStep);
-
-            // Determine which phase of the cycle we're in
-            if (currentStep < stepsToAmplitude) {
-                // Phase 1: 0 to +amplitude
-                return currentStep;
-            } else if (currentStep < stepsToAmplitude + stepsToNegativeAmplitude) {
-                // Phase 2: +amplitude to -amplitude
-                return amplitude - (currentStep - stepsToAmplitude);
-            } else {
-                // Phase 3: -amplitude back to 0
-                return -amplitude + (currentStep - (stepsToAmplitude + stepsToNegativeAmplitude));
-            }
-
-        }else{
-            // Ensure amplitude is positive
-            amplitude = Math.max(amplitude, 0);
-
-            // Cycle duration (perioda) is fixed to 1 second
-            double cycleDuration =  PERIODA;
-
-            // Total number of steps (for full cycle)
-            int stepsToAmplitude = amplitude;             // 0 to -amplitude
-            int stepsToPositiveAmplitude = 2 * amplitude; // -amplitude to +amplitude
-            int stepsToZero = amplitude;                  // +amplitude back to 0
-            int totalSteps = stepsToAmplitude + stepsToPositiveAmplitude + stepsToZero;
-
-            // Derive time per step dynamically
-            double timePerStep = cycleDuration / totalSteps;
-
-            // Normalize elapsedTime to the cycle (loop every cycleDuration)
-            double timeInCycle = getElapsedTime() % cycleDuration;
-
-            // Calculate which step we are in based on elapsed time
-            int currentStep = (int) (timeInCycle / timePerStep);
-
-            // Determine which phase of the cycle we're in
-            if (currentStep < stepsToAmplitude) {
-                // Phase 1: 0 to -amplitude
-                return -currentStep;
-            } else if (currentStep < stepsToAmplitude + stepsToPositiveAmplitude) {
-                // Phase 2: -amplitude to +amplitude
-                return -amplitude + (currentStep - stepsToAmplitude);
-            } else {
-                // Phase 3: +amplitude back to 0
-                return amplitude - (currentStep - (stepsToAmplitude + stepsToPositiveAmplitude));
-            }
-        }
-
+    public int getokamzitaAmplitude() {
+        return amplitude;
     }
 
 
@@ -521,11 +438,11 @@ public class SoundWave extends Circle {
     private int calculateAmplitudeForCircle(int circleIndex) {
 
         if  (circleIndex < 5){
-            return amplitude/5;
+            return amplitude/4;
         }else if (circleIndex < 15){
-            return -amplitude/5;
+            return -amplitude/4;
         }else{
-            return amplitude/5;
+            return amplitude/4;
         }
     }
 

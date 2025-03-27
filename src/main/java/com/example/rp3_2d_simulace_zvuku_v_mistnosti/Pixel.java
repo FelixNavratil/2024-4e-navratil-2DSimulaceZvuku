@@ -11,7 +11,6 @@ import java.time.Duration;
  * and the ability to be lit with a specified color.
  */
 public class Pixel extends Rectangle {
-    private static int PERIODA;
     private int gridX;       // The x-coordinate in the grid
     private int gridY;       // The y-coordinate in the grid
     private double realX;    // The real-world x-coordinate on the scene
@@ -20,14 +19,8 @@ public class Pixel extends Rectangle {
     private Rectangle rectangle;   // The visual representation of the pixel as a rectangle
     private static int PIXELSIZE;
 
-    private LocalDateTime lastUpdatedTime; // To track when the pixel's color was last explicitly updated
-
     public void setPixelSize(int pixelSize) {
         this.PIXELSIZE = pixelSize;
-    }
-
-    public void setPeriode(int periode) {
-        this.PERIODA = periode;
     }
 
     // Constructor for the pixel
@@ -46,8 +39,6 @@ public class Pixel extends Rectangle {
         rectangle.setHeight(PIXELSIZE);    // Set the rectangle height (1 pixel)
         setDefault();
 
-        // Note: We do NOT set lastUpdatedTime during initialization to exclude it as a color update
-        lastUpdatedTime = null; // Explicitly unset during construction
     }
 
     public static int getGridX(double realX, double xMin) {
@@ -61,17 +52,12 @@ public class Pixel extends Rectangle {
         return (int) Math.floor((realY - yMIn) / PIXELSIZE);
     }
 
-    public void setCelkovaVychylka(int celkovaVychylka) {
-        this.celkovaVychylka = celkovaVychylka;
-        setColor(celkovaVychylka);
-        updateLastUpdatedTime(); // Explicitly update the time only here
-    }
-
 
     public Rectangle getRectangle() {
         return rectangle;
     }
 
+    //Updates the pixel's color based on the celkovaVychylka.
     private void setColor(int celkovaVychylka) {
         // Get the JavaFX color from the method
         Color color = createColor(celkovaVychylka);
@@ -85,27 +71,14 @@ public class Pixel extends Rectangle {
         // Note: Do NOT update lastUpdatedTime during default initialization
     }
 
+    //Adds to celkovaVychylka
     public void addVychylka(int vychylka) {
         celkovaVychylka += vychylka;
         setColor(celkovaVychylka);
-        updateLastUpdatedTime(); // Explicitly update the time only here
     }
 
 
-
-    private void updateLastUpdatedTime() {
-        lastUpdatedTime = LocalDateTime.now();
-    }
-
-
-    @Override
-    public String toString() {
-        return "Pixel{" +
-                ", realX=" + realX +
-                ", realY=" + realY +
-                '}';
-    }
-
+    //creates color based on the celkova vychylka
     private Color createColor(int celkovaVychylka) {
 
 
